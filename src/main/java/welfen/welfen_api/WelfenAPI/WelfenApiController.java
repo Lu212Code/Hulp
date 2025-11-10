@@ -10,7 +10,12 @@ public class WelfenApiController {
     @GetMapping("/")
     @ResponseBody
     public String api() {
-        return "Welfen-API 1.0";
+        return "Welfen-API is running.";
     }
-
+    
+    @GetMapping("/info")
+    @ResponseBody
+    public String info() {
+    	return "Welfen-API Ver. 1.0";
+    }
 }
