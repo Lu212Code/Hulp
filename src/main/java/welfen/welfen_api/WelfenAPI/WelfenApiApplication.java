@@ -1,0 +1,13 @@
+package welfen.welfen_api.WelfenAPI;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class WelfenApiApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(WelfenApiApplication.class, args);
+	}
+
+}
