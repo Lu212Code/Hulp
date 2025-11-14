@@ -92,4 +92,12 @@ public class ChatController {
 
         chatService.endChat(chatId);
     }
+    
+    @GetMapping("/active")
+    public List<Chat> getActiveChats(@RequestHeader("Authorization") String token) throws Exception {
+        String username = jwtService.validateToken(token);
+        if (username == null) throw new RuntimeException("Nicht eingeloggt");
+
+        return chatService.getActiveChatsForUser(username);
+    }
 }

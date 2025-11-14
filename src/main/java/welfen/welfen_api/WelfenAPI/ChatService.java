@@ -85,4 +85,15 @@ public class ChatService {
         }
         return messages;
     }
+    
+    public List<Chat> getActiveChatsForUser(String username) {
+        List<Chat> userChats = new ArrayList<>();
+        for (Chat chat : activeChats.values()) {
+            if ((chat.getAskerUsername() != null && chat.getAskerUsername().equals(username)) ||
+                (chat.getHelperUsername() != null && chat.getHelperUsername().equals(username))) {
+                userChats.add(chat);
+            }
+        }
+        return userChats;
+    }
 }
