@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hulp – Nachhilfe Board</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Hamburger-Toggle -->
+  <button id="hamburgerBtn" class="hamburger-btn">☰</button>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <button onclick="showSection('fragen')">📚 Fragen</button>
+    <button onclick="showSection('neu')">➕ Neue Anfrage</button>
+    <button onclick="showSection('chat')">💬 Chat</button>
+    <button onclick="showSection('activeChats')">🟢 Aktive Chats</button>
+  </div>
+
+  <!-- Overlay fürs Mobile -->
+  <div class="overlay"></div>
+
+  <!-- Main Inhalt -->
+  <div class="main">
+    <div class="topbar">
+      <div id="loginArea">
+        <input id="username" placeholder="Benutzername" />
+        <input id="password" type="password" placeholder="Passwort" />
+        <button class="btn" onclick="login()">Login</button>
+        <button class="btn" onclick="showRegisterPopup()">Register</button>
+      </div>
+
+      <div id="userArea" style="display:none;">
+        Eingeloggt als <span id="userName"></span>
+        <button class="btn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <div id="fragen" class="section">
+      <h2>Fragen</h2>
+      <div id="fragenListe"></div>
+    </div>
+
+    <div id="neu" class="section">
+      <h2>Neue Frage erstellen</h2>
+      <select id="fach">
+        <option>Mathe</option>
+        <option>Deutsch</option>
+        <option>Englisch</option>
+        <option>Physik</option>
+        <option>Chemie</option>
+        <option>Biologie</option>
+      </select>
+      <textarea id="frageText" placeholder="Deine Frage..."></textarea>
+      <button class="btn" onclick="addFrage()">Frage senden</button>
+    </div>
+
+    <div id="chat" class="section">
+      <h2>Chat</h2>
+      <div id="chatList"></div>
+      <input id="chatInput" placeholder="Nachricht eingeben..." />
+      <button class="btn" onclick="sendChatMessage()">Senden</button>
+      <button class="btn" onclick="endCurrentChat()">Chat beenden</button>
+    </div>
+
+    <div id="activeChats" class="section">
+      <h2>Meine aktiven Chats</h2>
+      <div id="activeChatsList"></div>
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
