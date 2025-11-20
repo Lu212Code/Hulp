@@ -87,10 +87,11 @@ public class ChatController {
     @PostMapping("/end")
     public void endChat(@RequestHeader("Authorization") String token,
                         @RequestParam String chatId) throws Exception {
+
         String username = jwtService.validateToken(token);
         if (username == null) throw new RuntimeException("Nicht eingeloggt");
 
-        chatService.endChat(chatId);
+        chatService.finishChatAndPersist(chatId);
     }
     
     @GetMapping("/active")
@@ -99,5 +100,10 @@ public class ChatController {
         if (username == null) throw new RuntimeException("Nicht eingeloggt");
 
         return chatService.getActiveChatsForUser(username);
+    }
+    
+    @GetMapping("/questions")
+    public List<String> getAllFinishedQuestions() throws Exception {
+        return chatService.getAllStoredQuestions();
     }
 }

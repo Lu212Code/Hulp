@@ -1,10 +1,14 @@
 package welfen.welfen_api.WelfenAPI;
 
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import welfen.welfen_api.WelfenAPI.model.Chat;
 import welfen.welfen_api.WelfenAPI.model.Message;
 import welfen.welfen_api.WelfenAPI.util.ChatEncryption;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -95,5 +99,57 @@ public class ChatService {
             }
         }
         return userChats;
+    }
+    
+    public void finishChatAndPersist(String chatId) throws Exception {
+        Chat chat = activeChats.get(chatId);
+        if (chat == null) throw new RuntimeException("Chat nicht gefunden");
+
+        // Nachrichten laden
+        List<Message> messages = loadMessages(chatId);
+
+        // Persistente JSON erstellen
+        Map<String, Object> meta = new LinkedHashMap<>();
+        meta.put("chatId", chatId);
+        meta.put("questionId", chat.getQuestionId());
+        meta.put("asker", chat.getAskerUsername());
+        meta.put("helper", chat.getHelperUsername());
+        meta.put("createdAt", chat.getCreatedAt().toString());
+        meta.put("messages", messages);
+
+        Path metaFile = chatDir.resolve("meta-chat-" + chatId + ".json");
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.writerWithDefaultPrettyPrinter().writeValue(metaFile.toFile(), meta);
+
+        // Chat aus activeChats entfernen
+        activeChats.remove(chatId);
+    }
+    
+    public List<String> getAllStoredQuestions() throws Exception {
+        List<String> questions = new ArrayList<>();
+        ObjectMapper mapper = new ObjectMapper();
+
+        for (File file : Objects.requireNonNull(chatDir.toFile().listFiles())) {
+            if (file.getName().startsWith("meta-chat-") && file.getName().endsWith(".json")) {
+                Map<String, Object> meta = mapper.readValue(file, Map.class);
+
+                List<Map<String, Object>> msgs = (List<Map<String, Object>>) meta.get("messages");
+                if (!msgs.isEmpty()) {
+                    String firstMsg = (String) msgs.get(0).get("content");
+                    questions.add(firstMsg);
+                }
+            }
+        }
+
+        return questions;
+    }
+    
+    public Map<String, Object> loadFullChat(String chatId) throws Exception {
+        Path file = chatDir.resolve("meta-chat-" + chatId + ".json");
+        if (!file.toFile().exists()) throw new RuntimeException("Chat nicht gespeichert");
+
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(file.toFile(), Map.class);
     }
 }
