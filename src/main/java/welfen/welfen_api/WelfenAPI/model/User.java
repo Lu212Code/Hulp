@@ -15,7 +15,7 @@ public class User {
 
     @Column(nullable = false)
     private String password;
-
+    
     // Leerer Konstruktor für JPA
     public User() {}
 

@@ -10,6 +10,7 @@ public class Chat {
     private String helperUsername; // null bis Helfer zugewiesen wird
     private boolean active;
     private LocalDateTime createdAt;
+    private boolean askerConsent = false;
 
     public Chat() {}
 
@@ -39,4 +40,7 @@ public class Chat {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    
+    public boolean isAskerConsent() { return askerConsent; }
+    public void setAskerConsent(boolean consent) { this.askerConsent = consent; }
 }

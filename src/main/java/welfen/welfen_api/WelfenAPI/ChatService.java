@@ -9,6 +9,7 @@ import welfen.welfen_api.WelfenAPI.model.Message;
 import welfen.welfen_api.WelfenAPI.util.ChatEncryption;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -16,7 +17,7 @@ import java.util.*;
 @Service
 public class ChatService {
 
-    private final Path chatDir = Path.of("chats"); // Verzeichnis für Chat-Dateien
+    final Path chatDir = Path.of("chats"); // Verzeichnis für Chat-Dateien
     private final Map<String, Chat> activeChats = new HashMap<>(); // Chat-ID -> Chat
 
     public ChatService() throws Exception {
@@ -105,24 +106,42 @@ public class ChatService {
         Chat chat = activeChats.get(chatId);
         if (chat == null) throw new RuntimeException("Chat nicht gefunden");
 
+        // Nur der Fragesteller muss zustimmen
+        if (!chat.isAskerConsent()) {
+            // Nur beenden, aber NICHT archivieren
+            activeChats.remove(chatId);
+            return;
+        }
+
         // Nachrichten laden
         List<Message> messages = loadMessages(chatId);
 
-        // Persistente JSON erstellen
+        // Sanitizing (siehe vorherige Nachricht)
+        List<Map<String, Object>> safeMessages = new ArrayList<>();
+        for (Message m : messages) {
+            String safeContent = sanitizeContent(m.getContent(), chat);
+
+            Map<String, Object> msg = new LinkedHashMap<>();
+            msg.put("sender", "<anon>");
+            msg.put("content", safeContent);
+            msg.put("timestamp", m.getTimestamp().toString());
+            safeMessages.add(msg);
+        }
+
         Map<String, Object> meta = new LinkedHashMap<>();
         meta.put("chatId", chatId);
         meta.put("questionId", chat.getQuestionId());
-        meta.put("asker", chat.getAskerUsername());
-        meta.put("helper", chat.getHelperUsername());
+        meta.put("asker", "NutzerA");
+        meta.put("helper", "NutzerB");
         meta.put("createdAt", chat.getCreatedAt().toString());
-        meta.put("messages", messages);
-
-        Path metaFile = chatDir.resolve("meta-chat-" + chatId + ".json");
+        meta.put("messages", safeMessages);
 
         ObjectMapper mapper = new ObjectMapper();
-        mapper.writerWithDefaultPrettyPrinter().writeValue(metaFile.toFile(), meta);
+        mapper.writerWithDefaultPrettyPrinter().writeValue(
+                chatDir.resolve("meta-chat-" + chatId + ".json").toFile(),
+                meta
+        );
 
-        // Chat aus activeChats entfernen
         activeChats.remove(chatId);
     }
     
@@ -151,5 +170,67 @@ public class ChatService {
 
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(file.toFile(), Map.class);
+    }
+    
+    public void setAskerConsent(String chatId, String username, boolean consent) {
+        Chat chat = activeChats.get(chatId);
+        if (chat == null) throw new RuntimeException("Chat nicht gefunden");
+
+        if (!username.equals(chat.getAskerUsername())) {
+            throw new RuntimeException("Nur der Fragesteller darf zustimmen");
+        }
+
+        chat.setAskerConsent(consent);
+    }
+    
+    public String sanitizeContent(String content, Chat chat) {
+
+        // Usernamen ersetzen
+        content = content.replaceAll(chat.getAskerUsername(), "NutzerA");
+        if (chat.getHelperUsername() != null)
+            content = content.replaceAll(chat.getHelperUsername(), "NutzerB");
+
+        // E-Mail
+        content = content.replaceAll("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[A-Z]{2,6}", "<email>");
+
+        // Telefonnummern
+        content = content.replaceAll("\\b\\+?[0-9][0-9\\- ]{6,}\\b", "<telefon>");
+
+        // IP-Adressen
+        content = content.replaceAll(
+                "\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b",
+                "<ip>"
+        );
+
+        // Namen (einfacher Ansatz)
+        content = content.replaceAll("\\b[A-ZÄÖÜ][a-zäöü]{2,}\\b", "<name>");
+
+        return content;
+    }
+    
+    public void deleteOldChats() throws IOException {
+        File[] files = chatDir.toFile().listFiles();
+        if (files == null) return;
+
+        LocalDateTime now = LocalDateTime.now();
+        ObjectMapper mapper = new ObjectMapper();
+
+        for (File file : files) {
+            if (file.getName().startsWith("meta-chat-") && file.getName().endsWith(".json")) {
+                Map<String, Object> meta = mapper.readValue(file, Map.class);
+                String createdAtStr = (String) meta.get("createdAt");
+                LocalDateTime createdAt = LocalDateTime.parse(createdAtStr);
+
+                if (createdAt.isBefore(now.minusDays(30))) {
+                    // Meta-Datei löschen
+                    file.delete();
+
+                    // Entsprechende verschlüsselte Chat-Datei löschen
+                    String chatId = (String) meta.get("chatId");
+                    Path chatFile = chatDir.resolve("chat-" + chatId + ".aes");
+                    chatFile.toFile().delete();
+                }
+            }
+        }
     }
 }

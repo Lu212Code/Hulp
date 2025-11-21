@@ -4,7 +4,12 @@ import org.springframework.web.bind.annotation.*;
 import welfen.welfen_api.WelfenAPI.model.Chat;
 import welfen.welfen_api.WelfenAPI.model.Message;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -105,5 +110,34 @@ public class ChatController {
     @GetMapping("/questions")
     public List<String> getAllFinishedQuestions() throws Exception {
         return chatService.getAllStoredQuestions();
+    }
+    
+    @PostMapping("/consent")
+    public void giveConsent(
+            @RequestHeader("Authorization") String token,
+            @RequestParam String chatId,
+            @RequestParam boolean consent) throws Exception {
+
+        String username = jwtService.validateToken(token);
+        if (username == null) throw new RuntimeException("Nicht eingeloggt");
+
+        chatService.setAskerConsent(chatId, username, consent);
+    }
+    
+    @GetMapping("/archiv")
+    public List<Map<String, String>> getArchivedChats() throws Exception {
+        List<Map<String, String>> result = new ArrayList<>();
+        for (File file : Objects.requireNonNull(chatService.chatDir.toFile().listFiles())) {
+            if (file.getName().startsWith("meta-chat-") && file.getName().endsWith(".json")) {
+                Map<String, Object> meta = chatService.loadFullChat(file.getName().replace("meta-chat-", "").replace(".json",""));
+                Map<String, String> entry = new HashMap<>();
+                entry.put("chatId", (String) meta.get("chatId"));
+                entry.put("subject", meta.get("questionId").toString()); // Optional: Frage-Fach speichern
+                List<Map<String,Object>> msgs = (List<Map<String,Object>>) meta.get("messages");
+                entry.put("question", (String) msgs.get(0).get("content"));
+                result.add(entry);
+            }
+        }
+        return result;
     }
 }
