@@ -34,4 +34,18 @@ public class JwtService {
             return null;
         }
     }
+    
+    public String getUsernameFromToken(String token) {
+        // Entferne "Bearer " falls vorhanden
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+
+        return Jwts.parser()
+                .setSigningKey(key)
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
 }

@@ -49,7 +49,7 @@ public class UserService {
     }
 
     // Registrierung
-    public User register(String username, String password) {
+    public User register(String username, String password, String role) {
         if (!getAllowedUsernames().contains(username)) {
             throw new RuntimeException("USERNAME_NOT_ALLOWED");
         }
@@ -61,6 +61,7 @@ public class UserService {
         User user = User.builder()
                 .username(username)
                 .password(passwordEncoder.encode(password))
+                .role(role)
                 .build();
         return userRepository.save(user);
     }
@@ -89,5 +90,25 @@ public class UserService {
             throw new RuntimeException("USER_NOT_FOUND");
         }
         userRepository.delete(user.get());
+    }
+    
+    // Rolle eines Benutzers abfragen
+    public String getRole(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
+        return user.getRole();
+    }
+    
+    public void setRole(String username, String role) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
+
+        user.setRole(role);
+        userRepository.save(user);
+    }
+    
+    // Alle Benutzer abrufen
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 }

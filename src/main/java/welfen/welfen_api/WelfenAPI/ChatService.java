@@ -233,4 +233,8 @@ public class ChatService {
             }
         }
     }
+    
+    public void saveMessagesReflectively(String chatId, List<Message> messages) throws Exception {
+        saveMessages(chatId, messages);
+    }
 }

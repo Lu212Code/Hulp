@@ -16,14 +16,18 @@ public class User {
     @Column(nullable = false)
     private String password;
     
+    @Column(nullable = false)
+    private String role;
+    
     // Leerer Konstruktor für JPA
     public User() {}
 
     // Vollständiger Konstruktor
-    public User(Long id, String username, String password) {
+    public User(Long id, String username, String password, String role) {
         this.id = id;
         this.username = username;
         this.password = password;
+        this.role = role;
     }
 
     // Builder
@@ -40,19 +44,24 @@ public class User {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+    
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 
     // Innerer Builder
     public static class UserBuilder {
         private Long id;
         private String username;
         private String password;
+        private String role;
 
         public UserBuilder id(Long id) { this.id = id; return this; }
         public UserBuilder username(String username) { this.username = username; return this; }
         public UserBuilder password(String password) { this.password = password; return this; }
+        public UserBuilder role(String role) { this.role = role; return this; }
 
         public User build() {
-            return new User(id, username, password);
+            return new User(id, username, password, role);
         }
     }
 }
