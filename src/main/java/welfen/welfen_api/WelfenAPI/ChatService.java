@@ -39,10 +39,13 @@ public class ChatService {
     }
 
     // Helfer zuweisen und Chat aktivieren
-    public void assignHelper(String chatId, String helperUsername) {
+    public void assignHelper(String chatId, String helperUsername, String askerUsername) {
         Chat chat = activeChats.get(chatId);
+        System.out.println("----------------" + chat.getAskerUsername());
         if (chat != null) {
             chat.setHelperUsername(helperUsername);
+            chat.setAskerUsername(askerUsername);
+            System.out.println("----------------" + chat.getAskerUsername());
             chat.setActive(true);
         }
     }
@@ -236,5 +239,57 @@ public class ChatService {
     
     public void saveMessagesReflectively(String chatId, List<Message> messages) throws Exception {
         saveMessages(chatId, messages);
+    }
+    
+    public void deleteChat(String chatId) throws Exception {
+        boolean existsSomewhere = false;
+
+        // 1. Aktiven Chat entfernen
+        if (activeChats.containsKey(chatId)) {
+            activeChats.remove(chatId);
+            existsSomewhere = true;
+        }
+
+        // 2. Verschlüsselte Chat-Datei löschen
+        Path encryptedFile = chatDir.resolve("chat-" + chatId + ".aes");
+        if (encryptedFile.toFile().exists()) {
+            if (!encryptedFile.toFile().delete()) {
+                throw new RuntimeException("Konnte verschlüsselte Chat-Datei nicht löschen: " + encryptedFile);
+            }
+            existsSomewhere = true;
+        }
+
+        // 3. Meta-Archiv löschen
+        Path metaFile = chatDir.resolve("meta-chat-" + chatId + ".json");
+        if (metaFile.toFile().exists()) {
+            if (!metaFile.toFile().delete()) {
+                throw new RuntimeException("Konnte Meta-Archiv nicht löschen: " + metaFile);
+            }
+            existsSomewhere = true;
+        }
+
+        // 4. Falls Chat nirgends existiert → Fehler
+        if (!existsSomewhere) {
+            throw new RuntimeException("Chat mit ID " + chatId + " existiert nicht (weder aktiv noch gespeichert).");
+        }
+    }
+    
+    public Chat getChatByQuestionId(Long questionId) {
+        // Angenommen, du hast eine Map<String, Chat> oder List<Chat> aller aktiven Chats
+        // Hier Beispiel mit einer Liste aller aktiven Chats:
+        List<Chat> activeChats = getAllActiveChats(); // deine bestehende Methode
+        
+        for (Chat c : activeChats) {
+            if (c.getQuestionId() != null && c.getQuestionId().equals(questionId)) {
+                return c;
+            }
+        }
+        
+        // Kein Chat gefunden
+        return null;
+    }
+    
+    public List<Chat> getAllActiveChats() {
+        return new ArrayList<>(activeChats.values());
     }
 }

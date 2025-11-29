@@ -1,5 +1,6 @@
 package welfen.welfen_api.WelfenAPI;
 
+import welfen.welfen_api.WelfenAPI.model.Chat;
 import welfen.welfen_api.WelfenAPI.model.User;
 import welfen.welfen_api.WelfenAPI.repo.UserRepository;
 
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -90,6 +92,18 @@ public class UserService {
             throw new RuntimeException("USER_NOT_FOUND");
         }
         userRepository.delete(user.get());
+        
+        List<Chat> userChats = new ArrayList<Chat>();
+        userChats = ChatController.chatService.getActiveChatsForUser(username);
+        
+        for (Chat chat:userChats) {
+        	try {
+				ChatController.chatService.deleteChat(chat.getChatId());
+			} catch (Exception e) {
+				System.err.println("Chat konnte nicht gelöscht werden: ");
+				e.printStackTrace();
+			}
+        }
     }
     
     // Rolle eines Benutzers abfragen

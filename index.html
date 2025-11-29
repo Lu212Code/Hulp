@@ -1,76 +1,110 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hulp – Nachhilfe Board</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- Hamburger-Toggle -->
-  <button id="hamburgerBtn" class="hamburger-btn">☰</button>
+<div class="sidebar">
+  <button onclick="showSection('home')">🏠 <span>Startseite</span></button>
+  <button onclick="showSection('fragen')">📚 <span>Fragen</span></button>
+  <button onclick="showSection('neu')">➕ <span>Neue Frage</span></button>
+  <button onclick="showSection('chat')">💬 <span>Chat</span></button>
+  <button onclick="showSection('activeChats')">🟢 <span>Aktive Chats</span></button>
+  <button id="adminTabBtn" onclick="showSection('admin')" style="display:none;">🛠 <span>Admin</span></button>
+</div>
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <button onclick="showSection('fragen')">📚 Fragen</button>
-    <button onclick="showSection('neu')">➕ Neue Anfrage</button>
-    <button onclick="showSection('chat')">💬 Chat</button>
-    <button onclick="showSection('activeChats')">🟢 Aktive Chats</button>
+<div class="main">
+  <div class="topbar">
+    <div id="loginArea">
+      <input id="username" placeholder="Benutzername">
+      <input id="password" type="password" placeholder="Passwort">
+      <button class="btn" onclick="login()">Login</button>
+      <button class="btn" onclick="showRegisterPopup()">Register</button>
+    </div>
+    <div id="userArea" style="display:none;">
+      Eingeloggt als <span id="userName"></span>
+      <button class="btn" onclick="logout()">Logout</button>
+    </div>
   </div>
 
-  <!-- Overlay fürs Mobile -->
-  <div class="overlay"></div>
+  <!-- Abschnitt: Startseite -->
+  <div id="home" class="section">
+    <h1 style="font-size:42px; margin-bottom:10px;">Hulp</h1>
+    <p style="font-size:18px; max-width:600px;">
+      Hulp ist ein einfaches Nachhilfe-Board. Stelle Fragen, finde Helfer,
+      chatte live und archiviere gelöste Probleme für andere.
+    </p>
 
-  <!-- Main Inhalt -->
-  <div class="main">
-    <div class="topbar">
-      <div id="loginArea">
-        <input id="username" placeholder="Benutzername" />
-        <input id="password" type="password" placeholder="Passwort" />
-        <button class="btn" onclick="login()">Login</button>
-        <button class="btn" onclick="showRegisterPopup()">Register</button>
-      </div>
+    <h2>📦 Archivierte Fragen</h2>
+    <div id="archivListe">Lade...</div>
+  </div>
 
-      <div id="userArea" style="display:none;">
-        Eingeloggt als <span id="userName"></span>
-        <button class="btn" onclick="logout()">Logout</button>
-      </div>
-    </div>
+  <!-- Abschnitt: Fragen -->
+  <div id="fragen" class="section">
+    <h2>Fragen</h2>
+    <div id="fragenListe"></div>
+  </div>
 
-    <div id="fragen" class="section">
-      <h2>Fragen</h2>
-      <div id="fragenListe"></div>
-    </div>
+  <!-- Abschnitt: Neue Frage -->
+  <div id="neu" class="section" style="display:none;">
+    <h2>Neue Frage erstellen</h2>
+    <select id="fach">
+      <option>Mathe</option><option>Deutsch</option><option>Englisch</option>
+      <option>Physik</option><option>Chemie</option><option>Biologie</option>
+    </select>
+    <textarea id="frageText" placeholder="Deine Frage..."></textarea>
+    <button class="btn" onclick="addFrage()">Frage senden</button>
+  </div>
 
-    <div id="neu" class="section">
-      <h2>Neue Frage erstellen</h2>
-      <select id="fach">
-        <option>Mathe</option>
-        <option>Deutsch</option>
-        <option>Englisch</option>
-        <option>Physik</option>
-        <option>Chemie</option>
-        <option>Biologie</option>
-      </select>
-      <textarea id="frageText" placeholder="Deine Frage..."></textarea>
-      <button class="btn" onclick="addFrage()">Frage senden</button>
-    </div>
-
-    <div id="chat" class="section">
-      <h2>Chat</h2>
-      <div id="chatList"></div>
-      <input id="chatInput" placeholder="Nachricht eingeben..." />
-      <button class="btn" onclick="sendChatMessage()">Senden</button>
+  <!-- Abschnitt: Chat -->
+  <div id="chat" class="section" style="display:none;">
+    <h2>Chat</h2>
+    <div id="chatList" style="max-height:300px; overflow-y:auto; border:1px solid #6d28d9; padding:10px; border-radius:8px;"></div>
+    <input id="chatInput" placeholder="Nachricht eingeben...">
+    <button class="btn" onclick="sendChatMessage()">Senden</button>
       <button class="btn" onclick="endCurrentChat()">Chat beenden</button>
-    </div>
+  </div>
+</div>
 
-    <div id="activeChats" class="section">
-      <h2>Meine aktiven Chats</h2>
-      <div id="activeChatsList"></div>
+<!-- Abschnitt: Aktive Chats -->
+<div id="activeChats" class="section" style="display:none;">
+  <h2>Meine aktiven Chats</h2>
+  <div id="activeChatsList" style="max-height:300px; overflow-y:auto; border:1px solid #6d28d9; padding:10px; border-radius:8px;"></div>
+</div>
+
+<div id="admin" class="section" style="display:none;">
+  <h2>Adminbereich</h2>
+  <div id="adminContent">
+    <p>Lade Chats...</p>
+  </div>
+</div>
+
+
+<script src="questions.js"></script>
+<script src="chat.js"></script>
+<script src="main.js"></script>
+
+<div id="registerPopup">
+  <h3>Registrieren</h3>
+  <input id="regUsername" placeholder="Benutzername">
+  <input id="regPassword1" type="password" placeholder="Passwort">
+  <input id="regPassword2" type="password" placeholder="Passwort wiederholen">
+  <button class="btn" onclick="register()">Registrieren</button>
+  <button class="btn" onclick="closeRegisterPopup()">Abbrechen</button>
+</div>
+
+<div id="hulpPopup">
+  <div class="hulpPopupContent">
+    <p id="hulpPopupText"></p>
+    <div class="hulpPopupButtons">
+      <button id="hulpPopupOk" class="btn">OK</button>
+      <button id="hulpPopupCancel" class="btn" style="display:none;">Abbrechen</button>
     </div>
   </div>
-
-  <script src="main.js"></script>
+</div>
 </body>
 </html>

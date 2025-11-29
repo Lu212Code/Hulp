@@ -15,7 +15,7 @@ import java.util.Objects;
 @RequestMapping("/api/chat")
 public class ChatController {
 
-    private final ChatService chatService;
+    public static ChatService chatService;
     private final JwtService jwtService;
     private final QuestionService questionService;
 
@@ -47,14 +47,21 @@ public class ChatController {
      * Die Frage wird aus offenen Fragen gelöscht
      */
     @PostMapping("/assign-helper")
-    public Chat assignHelper(@RequestHeader("Authorization") String token,
-                             @RequestParam String chatId) throws Exception {
-        String username = jwtService.validateToken(token);
-        if (username == null) throw new RuntimeException("Nicht eingeloggt");
+    public Chat assignHelper(
+            @RequestHeader("Authorization") String token,
+            @RequestParam String chatId,
+            @RequestParam String askerUsername) throws Exception {
 
-        chatService.assignHelper(chatId, username);
+        // Helfer-Username validieren
+        String helperUsername = jwtService.validateToken(token);
+        if (helperUsername == null) throw new RuntimeException("Nicht eingeloggt");
 
+        // Helfer und Fragesteller im Chat setzen
+        chatService.assignHelper(chatId, helperUsername, askerUsername);
+
+        // Chat auslesen
         Chat chat = chatService.getChatById(chatId);
+
         // Frage aus offenen Fragen löschen
         questionService.deleteQuestion(chat.getQuestionId());
 
