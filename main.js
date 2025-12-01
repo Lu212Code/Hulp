@@ -94,7 +94,8 @@ async function loadFragen() {
     fragen.forEach(q => {
       const div = document.createElement("div");
       div.className = "pin-btn";
-      div.textContent = `${q.subject}: ${q.content} (${q.username})`;
+      div.textContent = `${q.subject} (Klasse ${q.klasse}): ${q.content} (${q.username})`;
+
 
       // Helfer-Button
       if (!q.active) {
