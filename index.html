@@ -23,7 +23,7 @@
       <input id="username" placeholder="Benutzername">
       <input id="password" type="password" placeholder="Passwort">
       <button class="btn" onclick="login()">Login</button>
-      <button class="btn" onclick="showRegisterPopup()">Register</button>
+      <button class="btn" onclick="showRegisterPopup()">Registrieren</button>
     </div>
     <div id="userArea" style="display:none;">
       Eingeloggt als <span id="userName"></span>
@@ -52,10 +52,42 @@
   <!-- Abschnitt: Neue Frage -->
   <div id="neu" class="section" style="display:none;">
     <h2>Neue Frage erstellen</h2>
-    <select id="fach">
-      <option>Mathe</option><option>Deutsch</option><option>Englisch</option>
-      <option>Physik</option><option>Chemie</option><option>Biologie</option>
-    </select>
+    <!-- Fach -->
+<select id="fach">
+  <option value="">Fach wählen…</option>
+  <option>Mathe</option>
+  <option>Deutsch</option>
+  <option>Englisch</option>
+  <option>Französisch</option>
+  <option>Latein</option>
+  <option>Spanisch</option>
+  <option>Italienisch</option>
+  <option>NWT</option>
+  <option>Informatik</option>
+  <option>Musik</option>
+  <option>Religion</option>
+  <option>Ethik</option>
+  <option>Physik</option>
+  <option>Chemie</option>
+  <option>Biologie</option>
+  <option>Geschichte</option>
+  <option>Geografie</option>
+</select>
+
+<!-- Klasse -->
+<select id="klasse">
+  <option value="">Klasse wählen…</option>
+  <option>5</option>
+  <option>6</option>
+  <option>7</option>
+  <option>8</option>
+  <option>9</option>
+  <option>10</option>
+  <option>11</option>
+  <option>12</option>
+  <option>13</option>
+</select>
+
     <textarea id="frageText" placeholder="Deine Frage..."></textarea>
     <button class="btn" onclick="addFrage()">Frage senden</button>
   </div>
