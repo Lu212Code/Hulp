@@ -14,6 +14,7 @@ public class Question {
     private String content;
     private String username;
     private LocalDateTime createdAt;
+    private String klasse = "unbekannt";
 
     // Leerer Konstruktor für JPA
     public Question() {}
@@ -36,4 +37,6 @@ public class Question {
     public void setUsername(String username) { this.username = username; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public String getKlasse() { return klasse; }
+    public void setKlasse(String klasse) { this.klasse = klasse; }
 }

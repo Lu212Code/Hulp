@@ -17,9 +17,13 @@ public class QuestionService {
         this.questionRepository = questionRepository;
     }
 
-    public Question addQuestion(String username, String subject, String content) {
-        Question question = new Question(username, subject, content, LocalDateTime.now());
-        return questionRepository.save(question);
+    public Question addQuestion(String username, String subject, String content, String klasse) {
+        Question q = new Question();
+        q.setUsername(username);
+        q.setSubject(subject);
+        q.setContent(content);
+        q.setKlasse(klasse);
+        return questionRepository.save(q);
     }
 
 

@@ -1,4 +1,4 @@
-const API_BASE = "https://backend.welfenmc.de:25562/api";
+const API_BASE = "https://xksj6l873p441h9e.myfritz.net:25562/api";
 let token = localStorage.getItem("jwt") || null;
 
 // aktuelle Chat-Daten
@@ -94,7 +94,7 @@ async function loadFragen() {
     fragen.forEach(q => {
       const div = document.createElement("div");
       div.className = "pin-btn";
-      div.textContent = `${q.subject} (Klasse ${q.klasse}): ${q.content} (${q.username})`;
+	  div.textContent = `${q.subject} (Klasse ${q.klasse}): ${q.content} (${q.username})`;
 
 
       // Helfer-Button
@@ -137,9 +137,10 @@ async function loadFragen() {
 async function addFrage() {
   const subject = document.getElementById("fach").value.trim();
   const content = document.getElementById("frageText").value.trim();
+  const klasse = document.getElementById("klasse").value.trim();
 
-  if (!subject || !content) {
-    await showHulpPopup("Bitte Fach und Text angeben!");
+  if (!subject || !content || !klasse) {
+    await showHulpPopup("Bitte Fach, Text und Klasse angeben!");
     return;
   }
 
@@ -147,7 +148,7 @@ async function addFrage() {
     await apiFetch("/questions/add", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ subject, content })
+      body: new URLSearchParams({ subject, content, klasse })
     });
 
     await showHulpPopup("Frage hinzugefügt!");
@@ -155,7 +156,7 @@ async function addFrage() {
     loadFragen();
 
   } catch (err) {
-    await showHulpPopup("Fehler beim hinzufügen der Frage");
+    await showHulpPopup("Fehler beim Hinzufügen der Frage");
     console.error(err);
   }
 }

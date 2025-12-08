@@ -18,12 +18,15 @@ public class QuestionController {
     }
 
     @PostMapping("/add")
-    public Question addQuestion(@RequestHeader("Authorization") String token,
-                                @RequestParam String subject,
-                                @RequestParam String content) {
+    public Question addQuestion(
+            @RequestHeader("Authorization") String token,
+            @RequestParam String subject,
+            @RequestParam String content,
+            @RequestParam String klasse   // <--- neu
+    ) {
         String username = jwtService.validateToken(token);
         if (username == null) throw new RuntimeException("Nicht eingeloggt");
-        return questionService.addQuestion(username, subject, content);
+        return questionService.addQuestion(username, subject, content, klasse);
     }
 
     @GetMapping("/all")
