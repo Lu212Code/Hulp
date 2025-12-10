@@ -41,12 +41,11 @@ public class ChatService {
     // Helfer zuweisen und Chat aktivieren
     public void assignHelper(String chatId, String helperUsername, String askerUsername) {
         Chat chat = activeChats.get(chatId);
-        System.out.println("----------------" + chat.getAskerUsername());
         if (chat != null) {
             chat.setHelperUsername(helperUsername);
             chat.setAskerUsername(askerUsername);
-            System.out.println("----------------" + chat.getAskerUsername());
             chat.setActive(true);
+            UserController.userService.addAnswered(helperUsername);
         }
     }
 

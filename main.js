@@ -30,45 +30,47 @@ async function login() {
     return;
   }
 
-  const res = await fetch(`${API_BASE}/users/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ username, password })
-  });
+  try {
+    const res = await fetch(`${API_BASE}/users/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ username, password })
+    });
 
-  if (!res.ok) {
-    await showHulpPopup("Login fehlgeschlagen!");
-    return;
+    const text = await res.text();
+
+    if (text === "Error") {
+      await showHulpPopup("Benutzername oder Passwort falsch!");
+      return;
+    }
+
+    // Token speichern
+    token = text;
+    localStorage.setItem("jwt", token);
+
+    // Benutzerinfo abrufen
+    const userInfo = await apiFetch("/users/me"); // { user: "username", userRole: "role" }
+    localStorage.setItem("username", userInfo.user);
+    localStorage.setItem("role", userInfo.userRole);
+
+    // UI aktualisieren
+    document.getElementById("userName").textContent = userInfo.user;
+    document.getElementById("userCornerText").textContent = userInfo.user;
+    document.getElementById("loginArea").style.display = "none";
+    document.getElementById("userArea").style.display = "block";
+
+    if (userInfo.userRole === "mod") {
+      document.getElementById("adminTabBtn").style.display = "inline-block";
+    } else {
+      document.getElementById("adminTabBtn").style.display = "none";
+    }
+
+    loadFragen();
+
+  } catch (err) {
+    console.error(err);
+    await showHulpPopup("Serverfehler beim Login!");
   }
-
-  // Token speichern
-  token = await res.text();
-  localStorage.setItem("jwt", token);
-
-  // Benutzerinfo vom Backend abrufen
-  const userInfo = await apiFetch("/users/me"); // { user: "username", userRole: "role" }
-  localStorage.setItem("username", userInfo.user);
-  localStorage.setItem("role", userInfo.userRole);
-
-  // Nach dem Speichern von userInfo
-  localStorage.setItem("role", userInfo.userRole);
-  if (userInfo.userRole === "mod") {
-    document.getElementById("adminTabBtn").style.display = "inline-block";
-  }
-
-  const role = localStorage.getItem("role") || "user";
-  if (role === "mod") {
-    document.getElementById("adminTabBtn").style.display = "inline-block";
-  } else {
-    document.getElementById("adminTabBtn").style.display = "none";
-  }
-
-  // UI aktualisieren
-  document.getElementById("userName").textContent = userInfo.user;
-  document.getElementById("loginArea").style.display = "none";
-  document.getElementById("userArea").style.display = "block";
-
-  loadFragen();
 }
 
 function logout() {
@@ -78,6 +80,7 @@ function logout() {
   document.getElementById("loginArea").style.display = "block";
   document.getElementById("userArea").style.display = "none";
   document.getElementById("fragenListe").innerHTML = "";
+  document.getElementById("userCornerText").textContent = "Login";
 }
 
 /* ---------------------------------------------------------
@@ -171,6 +174,7 @@ function showSection(id) {
   if (id === "fragen") loadFragen();
   else if (id === "activeChats") loadActiveChats();
   else if (id === "admin") loadAdmin();
+  else if (id === "leaderboard") loadLeaderboard();
 }
 
 /* ---------------------------------------------------------
@@ -550,5 +554,113 @@ async function assignHelperToChat(questionId, askerUsername) {
   } catch (err) {
     console.error("Fehler beim Helfer zuweisen:", err);
     await showHulpPopup("Fehler beim Helfer zuweisen!");
+  }
+}
+
+function openUserPanel() {
+  if (!token) {
+    // Login anzeigen
+    showSection("home");
+    document.getElementById("loginArea").style.display = "block";
+    document.getElementById("userArea").style.display = "none";
+    return;
+  }
+
+  // Benutzerprofil öffnen
+  document.getElementById("profileUsername").textContent =
+    localStorage.getItem("username") || "Unbekannt";
+
+  document.getElementById("profileRank").textContent =
+    localStorage.getItem("role") || "User";
+
+  loadUserStats();
+  showSection("userPanel");
+}
+
+async function loadUserStats() {
+  try {
+    const data = await apiFetch("/users/stats");
+    document.getElementById("askedCount").textContent = data.asked || 0;
+    document.getElementById("answeredCount").textContent = data.answered || 0;
+  } catch (err) {
+    console.error("Fehler beim Laden der Nutzerstatistik:", err);
+  }
+}
+
+async function changePassword() {
+  const p1 = document.getElementById("newPw1").value;
+  const p2 = document.getElementById("newPw2").value;
+
+  if (!p1 || !p2) return showHulpPopup("Bitte beide Felder ausfüllen!");
+  if (p1 !== p2) return showHulpPopup("Passwörter stimmen nicht überein!");
+  if (p1.length < 4) return showHulpPopup("Mindestens 4 Zeichen!");
+
+  const username = localStorage.getItem("username");
+  const token = localStorage.getItem("token");
+
+  try {
+    await apiFetch("/users/changepassword", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": token
+      },
+      body: new URLSearchParams({
+        username: username,
+        newPassword: p1
+      })
+    });
+
+    showHulpPopup("Passwort geändert!");
+    document.getElementById("newPw1").value = "";
+    document.getElementById("newPw2").value = "";
+
+  } catch (err) {
+    console.error(err);
+    showHulpPopup("Fehler beim Ändern!");
+  }
+}
+
+async function loadLeaderboard() {
+  if (!token) return showHulpPopup("Bitte einloggen!");
+
+  try {
+    const data = await apiFetch("/users/leaderboard");
+
+    const tbody = document.getElementById("leaderboardBody");
+    tbody.innerHTML = "";
+
+    // Top 50
+    data.leaderboard.forEach((entry, index) => {
+      const tr = document.createElement("tr");
+
+      const tdRank = document.createElement("td");
+      tdRank.textContent = index + 1;
+      const tdUser = document.createElement("td");
+      tdUser.textContent = entry.username;
+      const tdPoints = document.createElement("td");
+      tdPoints.textContent = entry.points;
+
+      tr.appendChild(tdRank);
+      tr.appendChild(tdUser);
+      tr.appendChild(tdPoints);
+
+      // Eigenen User hervorheben
+      if (entry.username === localStorage.getItem("username")) {
+        tr.style.backgroundColor = "#ffd70040";
+        tr.style.fontWeight = "bold";
+      }
+
+      tbody.appendChild(tr);
+    });
+
+    // Eigenen Platz anzeigen
+    const myPos = data.me;
+    document.getElementById("myLeaderboardPosition").textContent =
+      `Dein Platz: ${myPos.position > 0 ? myPos.position : "-"} | Punkte: ${myPos.points}`;
+
+  } catch (err) {
+    console.error(err);
+    showHulpPopup("Fehler beim Laden der Rangliste!");
   }
 }

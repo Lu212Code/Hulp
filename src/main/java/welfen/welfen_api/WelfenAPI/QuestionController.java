@@ -9,7 +9,7 @@ import java.util.List;
 @RequestMapping("/api/questions")
 public class QuestionController {
 
-    private final QuestionService questionService;
+    public static QuestionService questionService;
     private final JwtService jwtService;
 
     public QuestionController(QuestionService questionService, JwtService jwtService) {

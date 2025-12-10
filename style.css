@@ -258,3 +258,90 @@ textarea { resize:none; min-height:100px; }
     font-size: 1.3em;
   }
 }
+
+.userCorner {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #b71c1c;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.userIcon {
+  font-size: 22px;
+}
+
+#leaderboardSection {
+  padding: 1em;
+}
+
+#leaderboardTable th, #leaderboardTable td {
+  padding: 0.5em;
+  border-bottom: 1px solid #ccc;
+}
+
+#leaderboardTable tr:nth-child(even) {
+  background-color: #f5f5f5;
+}
+
+#myLeaderboardPosition {
+  background: #ffd70020;
+  padding: 0.5em;
+  border-radius: 5px;
+}
+
+/* Leaderboard-Tabelle auf volle Breite */
+#leaderboardTable {
+    width: 100%;           /* Tabelle nimmt die ganze Breite ein */
+    max-width: 100%;       /* Kein Limit */
+    border-collapse: collapse; /* Keine doppelten Linien */
+}
+
+/* Tabellenkopf */
+#leaderboardTable th {
+    text-align: center;
+    padding: 12px;
+    background-color: #6d28d9;
+    color: white;
+}
+
+/* Tabellenkörper */
+#leaderboardTable td {
+    text-align: center;
+    padding: 12px;       /* Mehr Platz in den Zellen */
+}
+
+/* Optional: Hover-Effekt */
+#leaderboardTable tbody tr:hover {
+    background-color: #f3e8ff;
+}
+
+select, textarea {
+  width:100%;
+  padding:12px;
+  border-radius:8px;
+  border:none;
+  background:#2a2a2a;
+  color:white;
+  margin-bottom:15px;
+  font-size:1em;
+}
+textarea { resize:none; min-height:100px; }
+
+input {
+  width:100%;
+  padding:12px;
+  border-radius:8px;
+  border:none;
+  background:#2a2a2a;
+  color:white;
+  margin-bottom:15px;
+  font-size:1em;
+}

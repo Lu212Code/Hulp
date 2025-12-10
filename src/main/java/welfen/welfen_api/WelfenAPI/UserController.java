@@ -13,12 +13,13 @@ import java.util.ArrayList;
 import org.springframework.web.bind.annotation.*;
 
 import welfen.welfen_api.WelfenAPI.model.User;
+import welfen.welfen_api.WelfenAPI.model.UserStats;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
 
-	private final UserService userService;
+	public static UserService userService;
 	private final JwtService jwtService;
 
 	public UserController(UserService userService, JwtService jwtService) {
@@ -70,6 +71,12 @@ public class UserController {
 		if (!success)
 			return "Error";
 		return jwtService.generateToken(username); // Token zurückgeben
+	}
+	
+	@GetMapping("/stats")
+	public UserStats getStats(@RequestHeader("Authorization") String token) {
+	    String username = jwtService.getUsernameFromToken(token);
+	    return userService.getStats(username);
 	}
 
 	@PostMapping("/changepassword")
@@ -126,5 +133,18 @@ public class UserController {
 
         userService.setRole(targetUser, role);
         return "Ok";
+    }
+    
+    @GetMapping("/leaderboard")
+    public Object getLeaderboard(@RequestHeader("Authorization") String token) {
+        String username = jwtService.getUsernameFromToken(token);
+
+        List<UserService.LeaderboardEntry> top50 = userService.getLeaderboardTop50();
+        UserService.LeaderboardPosition myPosition = userService.getUserPosition(username);
+
+        return new Object() {
+            public List<UserService.LeaderboardEntry> leaderboard = top50;
+            public UserService.LeaderboardPosition me = myPosition;
+        };
     }
 }

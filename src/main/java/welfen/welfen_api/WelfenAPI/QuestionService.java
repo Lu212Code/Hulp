@@ -23,6 +23,7 @@ public class QuestionService {
         q.setSubject(subject);
         q.setContent(content);
         q.setKlasse(klasse);
+        UserController.userService.addAsked(username);
         return questionRepository.save(q);
     }
 

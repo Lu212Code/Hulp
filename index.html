@@ -15,6 +15,7 @@
   <button onclick="showSection('chat')">💬 <span>Chat</span></button>
   <button onclick="showSection('activeChats')">🟢 <span>Aktive Chats</span></button>
   <button id="adminTabBtn" onclick="showSection('admin')" style="display:none;">🛠 <span>Admin</span></button>
+  <button id="leaderboardTabBtn" class="sidebar-btn" onclick="showSection('leaderboard')">🏆 Leaderboard</button>
 </div>
 
 <div class="main">
@@ -74,6 +75,7 @@
   <option>Spanisch</option>
   <option>Italienisch</option>
   <option>NWT</option>
+  <option>IMP</option>
   <option>Informatik</option>
   <option>Musik</option>
   <option>Religion</option>
@@ -111,7 +113,6 @@
     <button class="btn" onclick="sendChatMessage()">Senden</button>
       <button class="btn" onclick="endCurrentChat()">Chat beenden</button>
   </div>
-</div>
 
 <!-- Abschnitt: Aktive Chats -->
 <div id="activeChats" class="section" style="display:none;">
@@ -125,11 +126,6 @@
     <p>Lade Chats...</p>
   </div>
 </div>
-
-
-<script src="questions.js"></script>
-<script src="chat.js"></script>
-<script src="main.js"></script>
 
 <div id="registerPopup">
   <h3>Registrieren</h3>
@@ -149,5 +145,47 @@
     </div>
   </div>
 </div>
+
+<div id="userPanel" class="section" style="display:none;">
+  <h2>Mein Profil</h2>
+
+  <p><b>Benutzer:</b> <span id="profileUsername"></span></p>
+  <p><b>Rang:</b> <span id="profileRank">Lädt...</span></p>
+
+  <h3>Passwort ändern</h3>
+  <input id="newPw1" type="password" placeholder="Neues Passwort">
+  <input id="newPw2" type="password" placeholder="Wiederholen">
+  <button class="btn" onclick="changePassword()">Speichern</button>
+
+  <h3 style="margin-top:20px;">Statistik</h3>
+  <p>Gestellte Fragen: <span id="askedCount">0</span></p>
+  <p>Beantwortete Fragen: <span id="answeredCount">0</span></p>
+</div>
+
+<div id="leaderboard" class="section" style="display:none; padding: 20px;">
+  <h2>Leaderboard</h2>
+  <p id="myLeaderboardPosition">Lade...</p>
+  <table id="leaderboardTable" border="1" cellspacing="0" cellpadding="5">
+    <thead>
+      <tr>
+        <th>Platz</th>
+        <th>Benutzer</th>
+        <th>Punkte</th>
+      </tr>
+    </thead>
+    <tbody id="leaderboardBody">
+      <!-- Dynamisch befüllt -->
+    </tbody>
+  </table>
+</div>
+</div>
+<script src="questions.js"></script>
+<script src="chat.js"></script>
+<script src="main.js"></script>
 </body>
+
+<div class="userCorner" onclick="openUserPanel()">
+  <span class="userIcon">👤</span>
+  <span id="userCornerText">Login</span>
+</div>
 </html>
