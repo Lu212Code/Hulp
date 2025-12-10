@@ -41,19 +41,19 @@ async function loadChatMessages() {
       div.className = m.sender === localStorage.getItem("username") ? "my-msg" : "other-msg";
       div.textContent = `${m.sender}: ${m.content}`;
 
-      const reportBtn = document.createElement("button");
-      reportBtn.textContent = "Melden";
-      reportBtn.className = "small-btn";
-      reportBtn.onclick = async () => {
-        const reason = prompt("Grund für die Meldung?");
-        if (!reason) return;
-        const username = localStorage.getItem("username");
-        await apiFetch(`/reports/create?reporterUsername=${encodeURIComponent(username)}&type=chat&targetId=${currentChatId}&reason=${encodeURIComponent(reason)}`, {
-          method: "POST"
-        });
-        alert("Nachricht gemeldet!");
-      };
-      div.appendChild(reportBtn);
+      //const reportBtn = document.createElement("button");
+      //reportBtn.textContent = "Melden";
+      //reportBtn.className = "small-btn";
+      //reportBtn.onclick = async () => {
+      //  const reason = prompt("Grund für die Meldung?");
+      //  if (!reason) return;
+      //  const username = localStorage.getItem("username");
+      //  await apiFetch(`/reports/create?reporterUsername=${encodeURIComponent(username)}&type=chat&targetId=${currentChatId}&reason=${encodeURIComponent(reason)}`, {
+      //    method: "POST"
+      //  });
+      //  alert("Nachricht gemeldet!");
+      //};
+      //div.appendChild(reportBtn);
 
       chatList.appendChild(div);
     });
@@ -141,8 +141,8 @@ async function openExistingChat(chatId, subject, question) {
 
       messages.forEach(msg => {
         const div = document.createElement("div");
-        div.className = msg.username === localStorage.getItem("username") ? "my-msg" : "other-msg";
-        div.textContent = `${msg.username}: ${msg.content}`;
+        div.className = msg.sender === localStorage.getItem("username") ? "my-msg" : "other-msg";
+        div.textContent = `${msg.sender}: ${msg.content}`;
         chatList.appendChild(div);
       });
 
