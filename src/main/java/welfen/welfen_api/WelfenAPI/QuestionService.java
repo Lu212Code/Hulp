@@ -12,9 +12,11 @@ import java.util.List;
 public class QuestionService {
 
     private final QuestionRepository questionRepository;
+    private final StatsService stats;
 
-    public QuestionService(QuestionRepository questionRepository) {
+    public QuestionService(QuestionRepository questionRepository, StatsService stats) {
         this.questionRepository = questionRepository;
+        this.stats = stats;
     }
 
     public Question addQuestion(String username, String subject, String content, String klasse) {
@@ -24,6 +26,7 @@ public class QuestionService {
         q.setContent(content);
         q.setKlasse(klasse);
         UserController.userService.addAsked(username);
+        stats.addGefragt();
         return questionRepository.save(q);
     }
 

@@ -41,20 +41,6 @@ async function loadChatMessages() {
       div.className = m.sender === localStorage.getItem("username") ? "my-msg" : "other-msg";
       div.textContent = `${m.sender}: ${m.content}`;
 
-      //const reportBtn = document.createElement("button");
-      //reportBtn.textContent = "Melden";
-      //reportBtn.className = "small-btn";
-      //reportBtn.onclick = async () => {
-      //  const reason = prompt("Grund für die Meldung?");
-      //  if (!reason) return;
-      //  const username = localStorage.getItem("username");
-      //  await apiFetch(`/reports/create?reporterUsername=${encodeURIComponent(username)}&type=chat&targetId=${currentChatId}&reason=${encodeURIComponent(reason)}`, {
-      //    method: "POST"
-      //  });
-      //  alert("Nachricht gemeldet!");
-      //};
-      //div.appendChild(reportBtn);
-
       chatList.appendChild(div);
     });
     chatList.scrollTop = chatList.scrollHeight;

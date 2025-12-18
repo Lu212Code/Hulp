@@ -18,11 +18,13 @@ public class ChatController {
     public static ChatService chatService;
     private final JwtService jwtService;
     private final QuestionService questionService;
+    private final StatsService stats;
 
-    public ChatController(ChatService chatService, JwtService jwtService, QuestionService questionService) {
+    public ChatController(ChatService chatService, JwtService jwtService, QuestionService questionService, StatsService stats) {
         this.chatService = chatService;
         this.jwtService = jwtService;
         this.questionService = questionService;
+        this.stats = stats;
     }
 
     /**
@@ -65,6 +67,8 @@ public class ChatController {
         // Frage aus offenen Fragen löschen
         questionService.deleteQuestion(chat.getQuestionId());
 
+        stats.addBeantwortet();
+        
         return chat;
     }
 
@@ -78,6 +82,7 @@ public class ChatController {
         String username = jwtService.validateToken(token);
         if (username == null) throw new RuntimeException("Nicht eingeloggt");
 
+        stats.addMessage();
         chatService.addMessage(chatId, username, content);
     }
 

@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class WelfenApiApplication {
 
 	public static void main(String[] args) {
+		System.out.println("Starte API...");
 		SpringApplication.run(WelfenApiApplication.class, args);
 	}
 

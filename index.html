@@ -1,190 +1,277 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hulp – Nachhilfe Board</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hulp – Nachhilfe Board</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="sidebar">
-  <button onclick="showSection('home')">🏠 <span>Startseite</span></button>
-  <button onclick="showSection('fragen')">📚 <span>Fragen</span></button>
-  <button onclick="showSection('neu')">➕ <span>Neue Frage</span></button>
-  <button onclick="showSection('chat')">💬 <span>Chat</span></button>
-  <button onclick="showSection('activeChats')">🟢 <span>Aktive Chats</span></button>
-  <button id="adminTabBtn" onclick="showSection('admin')" style="display:none;">🛠 <span>Admin</span></button>
-  <button id="leaderboardTabBtn" class="sidebar-btn" onclick="showSection('leaderboard')">🏆 Leaderboard</button>
-</div>
+	<div class="sidebar">
+		<button onclick="showSection('home')">
+			🏠 <span>Startseite</span>
+		</button>
+		<button onclick="showSection('fragen')">
+			📚 <span>Fragen</span>
+		</button>
+		<button onclick="showSection('neu')">
+			➕ <span>Neue Frage</span>
+		</button>
+		<button onclick="showSection('chat')">
+			💬 <span>Chat</span>
+		</button>
+		<button onclick="showSection('activeChats')">
+			🟢 <span>Aktive Chats</span>
+		</button>
+		<button id="adminTabBtn" onclick="showSection('admin')"
+			style="display: none;">
+			🛠 <span>Admin</span>
+		</button>
+		<button id="leaderboardTabBtn" class="sidebar-btn"
+			onclick="showSection('leaderboard')">
+			🏆 <span>Leaderboard</span>
+		</button>
+	</div>
 
-<div class="main">
-  <div class="topbar">
-    <div id="loginArea">
-      <input id="username" placeholder="Benutzername">
-      <input id="password" type="password" placeholder="Passwort">
-      <button class="btn" onclick="login()">Login</button>
-      <button class="btn" onclick="showRegisterPopup()">Registrieren</button>
-    </div>
-    <div id="userArea" style="display:none;">
-      Eingeloggt als <span id="userName"></span>
-      <button class="btn" onclick="logout()">Logout</button>
-    </div>
-  </div>
+	<div class="main">
+		<div class="topbar">
+			<div id="loginArea">
+				<input id="username" placeholder="Benutzername"> <input
+					id="password" type="password" placeholder="Passwort">
+				<button class="btn" onclick="login()">Login</button>
+				<button class="btn" onclick="showRegisterPopup()">Registrieren</button>
+			</div>
+			<div id="userArea" style="display: none;">
+				Eingeloggt als <span id="userName"></span>
+				<button class="btn" onclick="logout()">Logout</button>
+			</div>
+		</div>
 
-<!-- Abschnitt: Startseite -->
-<div id="home" class="section">
-  <h1 style="font-size:42px; margin-bottom:10px;">Hulp</h1>
-  <p style="font-size:18px; max-width:600px;">
-    Hulp ist ein einfaches Nachhilfe-Board. Stelle Fragen, finde Helfer,
-    chatte live und archiviere gelöste Probleme für andere.
-  </p>
+		<!-- Abschnitt: Startseite -->
+		<div id="home" class="section">
+			<h1 style="font-size: 42px; margin-bottom: 10px;">Hulp</h1>
+			<p style="font-size: 18px; max-width: 600px;">Hulp ist ein
+				einfaches Nachhilfe-Board. Stelle Fragen, finde Helfer, chatte live
+				und archiviere gelöste Probleme für andere.</p>
 
-  <h2>📦 Archivierte Fragen</h2>
-  <div id="archivListe">Lade...</div>
-  <!-- Kleiner Hinweis-Link -->
-  <div style="font-size:12px; margin-top:15px; opacity:0.7; max-width:600px;">
-    Durch die Nutzung und den Aufenthalt auf dieser Seite akzeptierst du unsere 
-    <a href="agb.html" style="color:#b71c1c;">AGB</a>, 
-    <a href="datenschutz.html" style="color:#b71c1c;">Datenschutzbestimmungen</a> 
-    und 
-    <a href="nutzungsbedingungen.html" style="color:#b71c1c;">Nutzungsbedingungen</a>.
-  </div>
-</div>
+			<h2>📦 Archivierte Fragen</h2>
+
+			<div class="filter-bar">
+				<input id="filterTextArchiv" placeholder="Archiv durchsuchen…">
+				<select id="filterFachArchiv">
+					<option value="">Alle Fächer</option>
+					<option>Mathe</option>
+					<option>Deutsch</option>
+					<option>Englisch</option>
+					<option>Französisch</option>
+					<option>Latein</option>
+					<option>Spanisch</option>
+					<option>Italienisch</option>
+					<option>NWT</option>
+					<option>IMP</option>
+					<option>Informatik</option>
+					<option>Musik</option>
+					<option>Religion</option>
+					<option>Ethik</option>
+					<option>Physik</option>
+					<option>Chemie</option>
+					<option>Biologie</option>
+					<option>Geschichte</option>
+					<option>Geografie</option>
+				</select>
+			</div>
+
+			<div id="archivListe">Lade...</div>
+			<!-- Kleiner Hinweis-Link -->
+			<div
+				style="font-size: 12px; margin-top: 15px; opacity: 0.7; max-width: 600px;">
+				Durch die Nutzung und den Aufenthalt auf dieser Seite akzeptierst du
+				unsere <a href="agb.html" style="color: #b71c1c;">AGB</a>, <a
+					href="datenschutz.html" style="color: #b71c1c;">Datenschutzbestimmungen</a>
+				und <a href="nutzungsbedingungen.html" style="color: #b71c1c;">Nutzungsbedingungen</a>.
+			</div>
+		</div>
 
 
 
-  <!-- Abschnitt: Fragen -->
-  <div id="fragen" class="section">
-    <h2>Fragen</h2>
-    <div id="fragenListe"></div>
-  </div>
+		<!-- Abschnitt: Fragen -->
+		<div id="fragen" class="section">
+			<h2>Fragen</h2>
 
-  <!-- Abschnitt: Neue Frage -->
-  <div id="neu" class="section" style="display:none;">
-    <h2>Neue Frage erstellen</h2>
-    <!-- Fach -->
-<select id="fach">
-  <option value="">Fach wählen…</option>
-  <option>Mathe</option>
-  <option>Deutsch</option>
-  <option>Englisch</option>
-  <option>Französisch</option>
-  <option>Latein</option>
-  <option>Spanisch</option>
-  <option>Italienisch</option>
-  <option>NWT</option>
-  <option>IMP</option>
-  <option>Informatik</option>
-  <option>Musik</option>
-  <option>Religion</option>
-  <option>Ethik</option>
-  <option>Physik</option>
-  <option>Chemie</option>
-  <option>Biologie</option>
-  <option>Geschichte</option>
-  <option>Geografie</option>
-</select>
+			<div class="filter-bar">
+				<input id="filterTextFragen" placeholder="Text suchen…"> <select
+					id="filterFachFragen">
+					<option value="">Alle Fächer</option>
+					<option>Mathe</option>
+					<option>Deutsch</option>
+					<option>Englisch</option>
+					<option>Französisch</option>
+					<option>Latein</option>
+					<option>Spanisch</option>
+					<option>Italienisch</option>
+					<option>NWT</option>
+					<option>IMP</option>
+					<option>Informatik</option>
+					<option>Musik</option>
+					<option>Religion</option>
+					<option>Ethik</option>
+					<option>Physik</option>
+					<option>Chemie</option>
+					<option>Biologie</option>
+					<option>Geschichte</option>
+					<option>Geografie</option>
+					<!-- usw -->
+				</select> <select id="filterKlasseFragen">
+					<option value="">Alle Klassen</option>
+					<option>5</option>
+					<option>6</option>
+					<option>7</option>
+					<option>8</option>
+					<option>9</option>
+					<option>10</option>
+				</select>
+			</div>
 
-<!-- Klasse -->
-<select id="klasse">
-  <option value="">Klasse wählen…</option>
-  <option>5</option>
-  <option>6</option>
-  <option>7</option>
-  <option>8</option>
-  <option>9</option>
-  <option>10</option>
-  <option>11</option>
-  <option>12</option>
-  <option>13</option>
-</select>
+			<div id="fragenListe"></div>
+		</div>
 
-    <textarea id="frageText" placeholder="Deine Frage..."></textarea>
-    <button class="btn" onclick="addFrage()">Frage senden</button>
-  </div>
+		<!-- Abschnitt: Neue Frage -->
+		<div id="neu" class="section" style="display: none;">
+			<h2>Neue Frage erstellen</h2>
+			<!-- Fach -->
+			<select id="fach">
+				<option value="">Fach wählen…</option>
+				<option>Mathe</option>
+				<option>Deutsch</option>
+				<option>Englisch</option>
+				<option>Französisch</option>
+				<option>Latein</option>
+				<option>Spanisch</option>
+				<option>Italienisch</option>
+				<option>NWT</option>
+				<option>IMP</option>
+				<option>Informatik</option>
+				<option>Musik</option>
+				<option>Religion</option>
+				<option>Ethik</option>
+				<option>Physik</option>
+				<option>Chemie</option>
+				<option>Biologie</option>
+				<option>Geschichte</option>
+				<option>Geografie</option>
+			</select>
 
-  <!-- Abschnitt: Chat -->
-  <div id="chat" class="section" style="display:none;">
-    <h2>Chat</h2>
-    <div id="chatList" style="max-height:300px; overflow-y:auto; border:1px solid #6d28d9; padding:10px; border-radius:8px;"></div>
-    <input id="chatInput" placeholder="Nachricht eingeben...">
-    <button class="btn" onclick="sendChatMessage()">Senden</button>
-      <button class="btn" onclick="endCurrentChat()">Chat beenden</button>
-  </div>
+			<!-- Klasse -->
+			<select id="klasse">
+				<option value="">Klasse wählen…</option>
+				<option>5</option>
+				<option>6</option>
+				<option>7</option>
+				<option>8</option>
+				<option>9</option>
+				<option>10</option>
+				<option>11</option>
+				<option>12</option>
+				<option>13</option>
+			</select>
 
-<!-- Abschnitt: Aktive Chats -->
-<div id="activeChats" class="section" style="display:none;">
-  <h2>Meine aktiven Chats</h2>
-  <div id="activeChatsList" style="max-height:300px; overflow-y:auto; border:1px solid #6d28d9; padding:10px; border-radius:8px;"></div>
-</div>
+			<textarea id="frageText" placeholder="Deine Frage..."></textarea>
+			<button class="btn" onclick="addFrage()">Frage senden</button>
+		</div>
 
-<div id="admin" class="section" style="display:none;">
-  <h2>Adminbereich</h2>
-  <div id="adminContent">
-    <p>Lade Chats...</p>
-  </div>
-</div>
+		<!-- Abschnitt: Chat -->
+		<div id="chat" class="section" style="display: none;">
+			<h2>Chat</h2>
+			<div id="chatList"
+				style="max-height: 300px; overflow-y: auto; border: 1px solid #6d28d9; padding: 10px; border-radius: 8px;"></div>
+			<input id="chatInput" placeholder="Nachricht eingeben...">
+			<button class="btn" onclick="sendChatMessage()">Senden</button>
+			<button class="btn" onclick="endCurrentChat()">Chat beenden</button>
+		</div>
 
-<div id="registerPopup">
-  <h3>Registrieren</h3>
-  <input id="regUsername" placeholder="Benutzername">
-  <input id="regPassword1" type="password" placeholder="Passwort">
-  <input id="regPassword2" type="password" placeholder="Passwort wiederholen">
-  <button class="btn" onclick="register()">Registrieren</button>
-  <button class="btn" onclick="closeRegisterPopup()">Abbrechen</button>
-</div>
+		<!-- Abschnitt: Aktive Chats -->
+		<div id="activeChats" class="section" style="display: none;">
+			<h2>Meine aktiven Chats</h2>
+			<div id="activeChatsList"
+				style="max-height: 300px; overflow-y: auto; border: 1px solid #6d28d9; padding: 10px; border-radius: 8px;"></div>
+		</div>
 
-<div id="hulpPopup">
-  <div class="hulpPopupContent">
-    <p id="hulpPopupText"></p>
-    <div class="hulpPopupButtons">
-      <button id="hulpPopupOk" class="btn">OK</button>
-      <button id="hulpPopupCancel" class="btn" style="display:none;">Abbrechen</button>
-    </div>
-  </div>
-</div>
+		<div id="admin" class="section" style="display: none;">
+			<h2>Adminbereich</h2>
+			<div id="adminContent">
+				<p>Lade Chats...</p>
+			</div>
+		</div>
 
-<div id="userPanel" class="section" style="display:none;">
-  <h2>Mein Profil</h2>
+		<div id="registerPopup">
+			<h3>Registrieren</h3>
+			<input id="regUsername" placeholder="Benutzername"> <input
+				id="regPassword1" type="password" placeholder="Passwort"> <input
+				id="regPassword2" type="password" placeholder="Passwort wiederholen">
+			<button class="btn" onclick="register()">Registrieren</button>
+			<button class="btn" onclick="closeRegisterPopup()">Abbrechen</button>
+		</div>
 
-  <p><b>Benutzer:</b> <span id="profileUsername"></span></p>
-  <p><b>Rang:</b> <span id="profileRank">Lädt...</span></p>
+		<div id="hulpPopup">
+			<div class="hulpPopupContent">
+				<p id="hulpPopupText"></p>
+				<div class="hulpPopupButtons">
+					<button id="hulpPopupOk" class="btn">OK</button>
+					<button id="hulpPopupCancel" class="btn" style="display: none;">Abbrechen</button>
+				</div>
+			</div>
+		</div>
 
-  <h3>Passwort ändern</h3>
-  <input id="newPw1" type="password" placeholder="Neues Passwort">
-  <input id="newPw2" type="password" placeholder="Wiederholen">
-  <button class="btn" onclick="changePassword()">Speichern</button>
+		<div id="userPanel" class="section" style="display: none;">
+			<h2>Mein Profil</h2>
 
-  <h3 style="margin-top:20px;">Statistik</h3>
-  <p>Gestellte Fragen: <span id="askedCount">0</span></p>
-  <p>Beantwortete Fragen: <span id="answeredCount">0</span></p>
-</div>
+			<p>
+				<b>Benutzer:</b> <span id="profileUsername"></span>
+			</p>
+			<p>
+				<b>Rang:</b> <span id="profileRank">Lädt...</span>
+			</p>
 
-<div id="leaderboard" class="section" style="display:none; padding: 20px;">
-  <h2>Leaderboard</h2>
-  <p id="myLeaderboardPosition">Lade...</p>
-  <table id="leaderboardTable" border="1" cellspacing="0" cellpadding="5">
-    <thead>
-      <tr>
-        <th>Platz</th>
-        <th>Benutzer</th>
-        <th>Punkte</th>
-      </tr>
-    </thead>
-    <tbody id="leaderboardBody">
-      <!-- Dynamisch befüllt -->
-    </tbody>
-  </table>
-</div>
-</div>
-<script src="questions.js"></script>
-<script src="chat.js"></script>
-<script src="main.js"></script>
+			<h3>Passwort ändern</h3>
+			<input id="newPw1" type="password" placeholder="Neues Passwort">
+			<input id="newPw2" type="password" placeholder="Wiederholen">
+			<button class="btn" onclick="changePassword()">Speichern</button>
+
+			<h3 style="margin-top: 20px;">Statistik</h3>
+			<p>
+				Gestellte Fragen: <span id="askedCount">0</span>
+			</p>
+			<p>
+				Beantwortete Fragen: <span id="answeredCount">0</span>
+			</p>
+		</div>
+
+		<div id="leaderboard" class="section"
+			style="display: none; padding: 20px;">
+			<h2>Leaderboard</h2>
+			<p id="myLeaderboardPosition">Lade...</p>
+			<table id="leaderboardTable" border="1" cellspacing="0"
+				cellpadding="5">
+				<thead>
+					<tr>
+						<th>Platz</th>
+						<th>Benutzer</th>
+						<th>Punkte</th>
+					</tr>
+				</thead>
+				<tbody id="leaderboardBody">
+					<!-- Dynamisch befüllt -->
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<script src="questions.js"></script>
+	<script src="chat.js"></script>
+	<script src="main.js"></script>
 </body>
 
 <div class="userCorner" onclick="openUserPanel()">
-  <span class="userIcon">👤</span>
-  <span id="userCornerText">Login</span>
+	<span class="userIcon">👤</span> <span id="userCornerText">Login</span>
 </div>
 </html>
