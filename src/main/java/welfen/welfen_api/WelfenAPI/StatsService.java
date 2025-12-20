@@ -63,7 +63,7 @@ public class StatsService {
             this.beantwortet = loaded.beantwortet;
             this.messages = loaded.messages;
         } catch (IOException e) {
-            System.err.println("⚠️ Stats konnten nicht geladen werden");
+            System.err.println("Stats konnten nicht geladen werden");
             e.printStackTrace();
         }
     }
@@ -72,7 +72,7 @@ public class StatsService {
         try {
             mapper.writeValue(FILE, this);
         } catch (IOException e) {
-            System.err.println("⚠️ Stats konnten nicht gespeichert werden");
+            System.err.println("Stats konnten nicht gespeichert werden");
             e.printStackTrace();
         }
     }

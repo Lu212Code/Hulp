@@ -17,9 +17,40 @@ async function apiFetch(path, options = {}) {
 	const headers = options.headers || {};
 	if (token) headers["Authorization"] = token;
 
-	const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
-	if (!res.ok) throw new Error(await res.text());
-	return res.json().catch(() => null);
+	let res;
+	try {
+		res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+	} catch (e) {
+		throw new Error("Server nicht erreichbar");
+	}
+
+	// ⛔ Session / Token ungültig
+	if (res.status === 401 || res.status === 403) {
+		console.warn("Session abgelaufen → Logout");
+
+		await showHulpPopup(
+			"Deine Sitzung ist abgelaufen. Bitte melde dich erneut an."
+		);
+
+		logout();
+		throw new Error("Session abgelaufen");
+	}
+
+	// Andere Fehler
+	if (!res.ok) {
+		const text = await res.text();
+		throw new Error(text || "Unbekannter Fehler");
+	}
+
+	// Kein JSON? → null
+	const text = await res.text();
+	if (!text) return null;
+
+	try {
+		return JSON.parse(text);
+	} catch {
+		return text;
+	}
 }
 
 /* ---------------------------------------------------------

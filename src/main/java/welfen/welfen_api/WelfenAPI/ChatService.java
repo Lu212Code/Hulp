@@ -110,7 +110,6 @@ public class ChatService {
 
         // Nur der Fragesteller muss zustimmen
         if (!chat.isAskerConsent()) {
-            // Nur beenden, aber NICHT archivieren
             activeChats.remove(chatId);
             return;
         }
@@ -187,25 +186,36 @@ public class ChatService {
     
     public String sanitizeContent(String content, Chat chat) {
 
-        // Usernamen ersetzen
-        content = content.replaceAll(chat.getAskerUsername(), "NutzerA");
-        if (chat.getHelperUsername() != null)
-            content = content.replaceAll(chat.getHelperUsername(), "NutzerB");
-
-        // E-Mail
-        content = content.replaceAll("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[A-Z]{2,6}", "<email>");
-
-        // Telefonnummern
-        content = content.replaceAll("\\b\\+?[0-9][0-9\\- ]{6,}\\b", "<telefon>");
-
-        // IP-Adressen
+        // Usernamen (nur ganze Wörter)
         content = content.replaceAll(
-                "\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b",
-                "<ip>"
+            "\\b" + chat.getAskerUsername() + "\\b",
+            "NutzerA"
         );
 
-        // Namen (einfacher Ansatz)
-        content = content.replaceAll("\\b[A-ZÄÖÜ][a-zäöü]{2,}\\b", "<name>");
+        if (chat.getHelperUsername() != null) {
+            content = content.replaceAll(
+                "\\b" + chat.getHelperUsername() + "\\b",
+                "NutzerB"
+            );
+        }
+
+        // E-Mail
+        content = content.replaceAll(
+            "(?i)\\b[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}\\b",
+            "<email>"
+        );
+
+        // Telefonnummer (realistisch)
+        content = content.replaceAll(
+            "\\b(\\+\\d{1,3}[ \\-]?)?(\\(?\\d{2,4}\\)?[ \\-]?)?\\d{3,}[ \\-]?\\d{3,}\\b",
+            "<telefon>"
+        );
+
+        // IP-Adresse
+        content = content.replaceAll(
+            "\\b(?:(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\b",
+            "<ip>"
+        );
 
         return content;
     }
@@ -243,13 +253,11 @@ public class ChatService {
     public void deleteChat(String chatId) throws Exception {
         boolean existsSomewhere = false;
 
-        // 1. Aktiven Chat entfernen
         if (activeChats.containsKey(chatId)) {
             activeChats.remove(chatId);
             existsSomewhere = true;
         }
 
-        // 2. Verschlüsselte Chat-Datei löschen
         Path encryptedFile = chatDir.resolve("chat-" + chatId + ".aes");
         if (encryptedFile.toFile().exists()) {
             if (!encryptedFile.toFile().delete()) {
@@ -258,7 +266,6 @@ public class ChatService {
             existsSomewhere = true;
         }
 
-        // 3. Meta-Archiv löschen
         Path metaFile = chatDir.resolve("meta-chat-" + chatId + ".json");
         if (metaFile.toFile().exists()) {
             if (!metaFile.toFile().delete()) {
@@ -267,16 +274,13 @@ public class ChatService {
             existsSomewhere = true;
         }
 
-        // 4. Falls Chat nirgends existiert → Fehler
         if (!existsSomewhere) {
             throw new RuntimeException("Chat mit ID " + chatId + " existiert nicht (weder aktiv noch gespeichert).");
         }
     }
     
     public Chat getChatByQuestionId(Long questionId) {
-        // Angenommen, du hast eine Map<String, Chat> oder List<Chat> aller aktiven Chats
-        // Hier Beispiel mit einer Liste aller aktiven Chats:
-        List<Chat> activeChats = getAllActiveChats(); // deine bestehende Methode
+        List<Chat> activeChats = getAllActiveChats();
         
         for (Chat c : activeChats) {
             if (c.getQuestionId() != null && c.getQuestionId().equals(questionId)) {

@@ -16,10 +16,8 @@ public class Question {
     private LocalDateTime createdAt;
     private String klasse = "unbekannt";
 
-    // Leerer Konstruktor für JPA
     public Question() {}
 
-    // Konstruktor für manuelles Erstellen
     public Question(String username, String subject, String content, LocalDateTime createdAt) {
         this.username = username;
         this.subject = subject;
@@ -27,7 +25,6 @@ public class Question {
         this.createdAt = createdAt;
     }
 
-    // Getter und Setter
     public Long getId() { return id; }
     public String getSubject() { return subject; }
     public void setSubject(String subject) { this.subject = subject; }

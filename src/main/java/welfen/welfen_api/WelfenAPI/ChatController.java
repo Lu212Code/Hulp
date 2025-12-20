@@ -27,10 +27,6 @@ public class ChatController {
         this.stats = stats;
     }
 
-    /**
-     * Chat erstellen für eine Frage
-     * Fragesteller wird automatisch hinzugefügt
-     */
     @PostMapping("/create")
     public Chat createChat(@RequestHeader("Authorization") String token,
                            @RequestParam Long questionId) throws Exception {
@@ -44,10 +40,6 @@ public class ChatController {
         return chatService.createChat(questionId, username, question.getContent());
     }
 
-    /**
-     * Helfer zuweisen → Chat aktivieren
-     * Die Frage wird aus offenen Fragen gelöscht
-     */
     @PostMapping("/assign-helper")
     public Chat assignHelper(
             @RequestHeader("Authorization") String token,
@@ -72,9 +64,6 @@ public class ChatController {
         return chat;
     }
 
-    /**
-     * Nachricht senden
-     */
     @PostMapping("/send")
     public void sendMessage(@RequestHeader("Authorization") String token,
                             @RequestParam String chatId,
@@ -86,9 +75,6 @@ public class ChatController {
         chatService.addMessage(chatId, username, content);
     }
 
-    /**
-     * Nachrichten abrufen
-     */
     @GetMapping("/messages")
     public List<Message> getMessages(@RequestHeader("Authorization") String token,
                                      @RequestParam String chatId) throws Exception {
@@ -98,9 +84,6 @@ public class ChatController {
         return chatService.getMessages(chatId);
     }
 
-    /**
-     * Chat beenden
-     */
     @PostMapping("/end")
     public void endChat(@RequestHeader("Authorization") String token,
                         @RequestParam String chatId) throws Exception {
@@ -144,7 +127,7 @@ public class ChatController {
                 Map<String, Object> meta = chatService.loadFullChat(file.getName().replace("meta-chat-", "").replace(".json",""));
                 Map<String, String> entry = new HashMap<>();
                 entry.put("chatId", (String) meta.get("chatId"));
-                entry.put("subject", meta.get("questionId").toString()); // Optional: Frage-Fach speichern
+                entry.put("subject", meta.get("questionId").toString());
                 List<Map<String,Object>> msgs = (List<Map<String,Object>>) meta.get("messages");
                 entry.put("question", (String) msgs.get(0).get("content"));
                 result.add(entry);

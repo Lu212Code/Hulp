@@ -7,7 +7,7 @@ import java.nio.file.Path;
 
 public class ChatEncryption {
 
-    private static final String KEY = "1234567890123456"; // 16 Zeichen = 128 Bit AES
+    private static final String KEY = "1234567890123456";
     private static final String ALGORITHM = "AES";
 
     public static void saveEncrypted(Path path, String content) throws Exception {

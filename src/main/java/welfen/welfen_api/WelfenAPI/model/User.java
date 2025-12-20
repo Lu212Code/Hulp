@@ -30,12 +30,10 @@ public class User {
         this.role = role;
     }
 
-    // Builder
     public static UserBuilder builder() {
         return new UserBuilder();
     }
 
-    // Getter & Setter
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -48,7 +46,6 @@ public class User {
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
 
-    // Innerer Builder
     public static class UserBuilder {
         private Long id;
         private String username;
