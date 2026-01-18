@@ -9,6 +9,7 @@ let currentQuestion = null;
 let allQuestions = [];
 let allArchive = [];
 
+let chatInterval = null; // Intervall für Live-Updates
 
 /* ---------------------------------------------------------
    🔧 API Helper
@@ -24,7 +25,6 @@ async function apiFetch(path, options = {}) {
 		throw new Error("Server nicht erreichbar");
 	}
 
-	// ⛔ Session / Token ungültig
 	if (res.status === 401 || res.status === 403) {
 		console.warn("Session abgelaufen → Logout");
 
@@ -36,13 +36,11 @@ async function apiFetch(path, options = {}) {
 		throw new Error("Session abgelaufen");
 	}
 
-	// Andere Fehler
 	if (!res.ok) {
 		const text = await res.text();
 		throw new Error(text || "Unbekannter Fehler");
 	}
 
-	// Kein JSON? → null
 	const text = await res.text();
 	if (!text) return null;
 
@@ -79,16 +77,13 @@ async function login() {
 			return;
 		}
 
-		// Token speichern
 		token = text;
 		localStorage.setItem("jwt", token);
 
-		// Benutzerinfo abrufen
-		const userInfo = await apiFetch("/users/me"); // { user: "username", userRole: "role" }
+		const userInfo = await apiFetch("/users/me");
 		localStorage.setItem("username", userInfo.user);
 		localStorage.setItem("role", userInfo.userRole);
 
-		// UI aktualisieren
 		document.getElementById("userName").textContent = userInfo.user;
 		document.getElementById("userCornerText").textContent = userInfo.user;
 		document.getElementById("loginArea").style.display = "none";
@@ -111,7 +106,7 @@ async function login() {
 function logout() {
 	token = null;
 	localStorage.removeItem("jwt");
-	localStorage.removeItem("username"); // <--- hinzufügen
+	localStorage.removeItem("username");
 	document.getElementById("loginArea").style.display = "block";
 	document.getElementById("userArea").style.display = "none";
 	document.getElementById("fragenListe").innerHTML = "";
@@ -246,6 +241,9 @@ document.addEventListener("DOMContentLoaded", () => {
 	loadArchiv();
 });
 
+/* ---------------------------------------------------------
+   🔹 ACTIVE CHATS / WhatsApp-Style Chat
+--------------------------------------------------------- */
 async function loadActiveChats() {
 	const list = document.getElementById("activeChatsList");
 	list.innerHTML = "Lade...";
@@ -265,7 +263,6 @@ async function loadActiveChats() {
 			const div = document.createElement("div");
 			div.className = "pin-btn";
 
-			// Wer ist wer?
 			let otherPerson = "";
 			if (c.askerUsername === me) {
 				otherPerson = c.helperUsername || "Helfer noch nicht zugewiesen";
@@ -285,197 +282,151 @@ async function loadActiveChats() {
 	}
 }
 
-async function endCurrentChat() {
-	if (!currentChatId) return await showHulpPopup("Kein Chat geöffnet!");
-
-	const ok = await showHulpPopup("Willst du den Chat wirklich beenden?", { ok: true, cancel: true });
-	if (!ok) return;
-
-	const consent = await showHulpPopup(
-		"Darf diese Frage anonymisiert ins öffentliche Archiv?",
-		{ ok: true, cancel: true }
-	);
-
-	try {
-		if (consent) {
-			await apiFetch("/chat/consent", {
-				method: "POST",
-				headers: { "Content-Type": "application/x-www-form-urlencoded" },
-				body: new URLSearchParams({ chatId: currentChatId, consent: true })
-			});
-		}
-
-		await apiFetch("/chat/end", {
-			method: "POST",
-			headers: { "Content-Type": "application/x-www-form-urlencoded" },
-			body: new URLSearchParams({ chatId: currentChatId })
-		});
-
-		await showHulpPopup("Chat beendet!");
-		currentChatId = null;
-		currentSubject = null;
-		currentQuestion = null;
-		clearInterval(chatInterval);
-		chatInterval = null;
-
-		showSection("home");
-		loadArchiv();
-		loadActiveChats();
-		document.getElementById("chatList").innerHTML = "";
-
-	} catch (err) {
-		console.error("Fehler beim Beenden des Chats:", err);
-		await showHulpPopup("Chat konnte nicht beendet werden!");
-	}
-}
-
-function showRegisterPopup() {
-	document.getElementById('registerPopup').style.display = 'block';
-}
-
-function closeRegisterPopup() {
-	document.getElementById('registerPopup').style.display = 'none';
-}
-
-async function register() {
-	const username = document.getElementById('regUsername').value.trim();
-	const password1 = document.getElementById('regPassword1').value;
-	const password2 = document.getElementById('regPassword2').value;
-
-	if (!username || !password1 || !password2) {
-		await showHulpPopup("Bitte alle Felder ausfüllen!");
-		return;
-	}
-
-	if (password1.length < 4) {
-		await showHulpPopup("Das Passwort muss mindestens vier Zeichen haben!");
-		return;
-	}
-
-	if (password1 !== password2) {
-		await showHulpPopup("Die Passwörter stimmen nicht überein!");
-		return;
-	}
-
-	try {
-		const res = await fetch(`${API_BASE}/users/register`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-			body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password1)}`
-		});
-
-		if (res.ok) {
-			await showHulpPopup("Registrierung erfolgreich!");
-			closeRegisterPopup();
-		} else {
-			const text = await res.text();
-			await showHulpPopup("Fehler bei der Registrierung, bitte versuche es später erneut.");
-		}
-	} catch (err) {
-		await showHulpPopup("Fehler bei der Registrierung, bitte versuche es später erneut.");
-	}
-}
-
-function showHulpPopup(message, options = { ok: true, cancel: false }) {
-	const popup = document.getElementById("hulpPopup");
-	const text = document.getElementById("hulpPopupText");
-	const okBtn = document.getElementById("hulpPopupOk");
-	const cancelBtn = document.getElementById("hulpPopupCancel");
-
-	text.textContent = message;
-	okBtn.style.display = options.ok ? "inline-block" : "none";
-	cancelBtn.style.display = options.cancel ? "inline-block" : "none";
-
-	return new Promise((resolve) => {
-		popup.style.display = "flex";
-
-		const cleanUp = () => {
-			okBtn.onclick = null;
-			cancelBtn.onclick = null;
-			popup.style.display = "none";
-		}
-
-		okBtn.onclick = () => { cleanUp(); resolve(true); }
-		cancelBtn.onclick = () => { cleanUp(); resolve(false); }
-	});
-}
-
-async function loadArchiv() {
-	const list = document.getElementById("archivListe");
-	if (!list) return;
-	list.innerHTML = "Lade...";
-
-	try {
-		allArchive = await apiFetch("/chat/archiv");
-		renderFilteredArchiv();
-	} catch (err) {
-		console.error(err);
-		list.textContent = "Fehler beim Laden des Archivs.";
-	}
-}
-
-function renderFilteredArchiv() {
-	const text = document.getElementById("filterTextArchiv")?.value.toLowerCase() || "";
-	const fach = document.getElementById("filterFachArchiv")?.value || "";
-
-	const list = document.getElementById("archivListe");
-	list.innerHTML = "";
-
-	const filtered = allArchive.filter(e =>
-		(!text || e.question.toLowerCase().includes(text)) &&
-		(!fach || e.subject === fach)
-	);
-
-	if (filtered.length === 0) {
-		list.textContent = "Keine Treffer im Archiv.";
-		return;
-	}
-
-	filtered.forEach(e => {
-		const div = document.createElement("div");
-		div.className = "pin-btn";
-		div.textContent = `${e.subject}: ${e.question}`;
-		div.onclick = () => openArchivedChat(e.chatId, e.subject, e.question);
-		list.appendChild(div);
-	});
-}
-
-async function saveChatToArchive(chatId, messages, subject, question) {
-	return await apiFetch("/chat/save", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({
-			chatId,
-			messages,
-			subject,
-			question
-		})
-	});
-}
-
-async function openArchivedChat(chatId, subject, question) {
-	showSection("chat"); // Chat-Section öffnen
+/* ---------------------------------------------------------
+   🔹 OPEN EXISTING CHAT (WhatsApp-Style)
+--------------------------------------------------------- */
+async function openExistingChat(chatId, subject, question) {
+	showSection("chat");
 	currentChatId = chatId;
 	currentSubject = subject;
 	currentQuestion = question;
 
 	const chatList = document.getElementById("chatList");
 	const chatInput = document.getElementById("chatInput");
-	const sendBtn = chatInput.nextElementSibling; // Annahme: Button direkt danach
+	const sendBtn = chatInput.nextElementSibling;
+
+	chatList.innerHTML = "Lade Chat...";
+	chatInput.disabled = false;
+	sendBtn.disabled = false;
+	sendBtn.textContent = "Senden";
+
+	async function loadMessages() {
+		try {
+			const messages = await apiFetch(`/chat/messages?chatId=${chatId}`);
+			chatList.innerHTML = "";
+
+			messages.forEach(msg => {
+				const isMe = msg.username === localStorage.getItem("username");
+
+				const bubble = document.createElement("div");
+				bubble.className = `chat-bubble ${isMe ? "chat-right" : "chat-left"}`;
+
+				const nameDiv = document.createElement("div");
+				nameDiv.className = "chat-username";
+				nameDiv.textContent = msg.username;
+
+				const textDiv = document.createElement("div");
+				textDiv.textContent = msg.content;
+
+				bubble.appendChild(nameDiv);
+				bubble.appendChild(textDiv);
+
+				bubble.onclick = () => reportMessage(msg);
+
+				chatList.appendChild(bubble);
+			});
+
+			chatList.scrollTop = chatList.scrollHeight;
+
+		} catch (err) {
+			console.error("Fehler beim Laden der Nachrichten:", err);
+			chatList.textContent = "Fehler beim Laden des Chats.";
+		}
+	}
+
+	await loadMessages();
+
+	if (chatInterval) clearInterval(chatInterval);
+	chatInterval = setInterval(loadMessages, 2000);
+
+	sendBtn.onclick = async () => {
+		const content = chatInput.value.trim();
+		if (!content) return;
+
+		try {
+			await apiFetch("/chat/send", {
+				method: "POST",
+				headers: { "Content-Type": "application/x-www-form-urlencoded" },
+				body: new URLSearchParams({ chatId, content })
+			});
+			chatInput.value = "";
+			await loadMessages();
+		} catch (err) {
+			console.error("Fehler beim Senden:", err);
+			await showHulpPopup("Nachricht konnte nicht gesendet werden!");
+		}
+	};
+}
+
+/* ---------------------------------------------------------
+   🔹 MELDEN NACHRICHT
+--------------------------------------------------------- */
+async function reportMessage(msg) {
+	const ok = await showHulpPopup(
+		`Möchten Sie diese Nachricht melden?\n\n"${msg.content}"`,
+		{ ok: true, cancel: true }
+	);
+
+	if (!ok) return;
+
+	const reason = prompt("Grund für die Meldung?");
+	if (!reason) return;
+
+	try {
+		const reporter = localStorage.getItem("username");
+
+		await apiFetch(
+			`/reports/create?reporterUsername=${encodeURIComponent(reporter)}&type=message&targetId=${msg.id}&reason=${encodeURIComponent(reason)}`,
+			{ method: "POST" }
+		);
+
+		await showHulpPopup("Nachricht wurde gemeldet.");
+	} catch (err) {
+		console.error(err);
+		await showHulpPopup("Fehler beim Melden der Nachricht.");
+	}
+}
+
+/* ---------------------------------------------------------
+   🔹 OPEN ARCHIVED CHAT (WhatsApp-Style)
+--------------------------------------------------------- */
+async function openArchivedChat(chatId, subject, question) {
+	showSection("chat");
+	currentChatId = chatId;
+	currentSubject = subject;
+	currentQuestion = question;
+
+	const chatList = document.getElementById("chatList");
+	const chatInput = document.getElementById("chatInput");
+	const sendBtn = chatInput.nextElementSibling;
+
 	chatList.innerHTML = "Lade Chat...";
 
 	try {
 		const messages = await apiFetch(`/chat/messages?chatId=${chatId}`);
-
 		chatList.innerHTML = "";
+
 		messages.forEach(msg => {
-			const div = document.createElement("div");
-			div.className = msg.username === localStorage.getItem("username") ? "my-msg" : "other-msg";
-			div.textContent = `${msg.username}: ${msg.content}`;
-			chatList.appendChild(div);
+			const isMe = msg.username === localStorage.getItem("username");
+
+			const bubble = document.createElement("div");
+			bubble.className = `chat-bubble ${isMe ? "chat-right" : "chat-left"}`;
+
+			const nameDiv = document.createElement("div");
+			nameDiv.className = "chat-username";
+			nameDiv.textContent = msg.username;
+
+			const textDiv = document.createElement("div");
+			textDiv.textContent = msg.content;
+
+			bubble.appendChild(nameDiv);
+			bubble.appendChild(textDiv);
+
+			bubble.onclick = () => reportMessage(msg);
+
+			chatList.appendChild(bubble);
 		});
 
-		// Archivierte Chats: Eingabe deaktivieren
 		chatInput.disabled = true;
 		sendBtn.disabled = true;
 		sendBtn.textContent = "Archivierter Chat";
@@ -483,239 +434,5 @@ async function openArchivedChat(chatId, subject, question) {
 	} catch (err) {
 		console.error(err);
 		chatList.textContent = "Fehler beim Laden des Chats.";
-	}
-}
-
-async function loadAdmin() {
-	const container = document.getElementById("adminContent");
-	container.innerHTML = "Lade aktive Chats...";
-
-	try {
-		// 1️⃣ Aktive Chats abrufen
-		const activeChats = await apiFetch("/chat/active");
-		container.innerHTML = "";
-
-		if (!activeChats || activeChats.length === 0) {
-			container.textContent = "Keine aktiven Chats vorhanden.";
-			return;
-		}
-
-		activeChats.forEach(chat => {
-			const div = document.createElement("div");
-			div.className = "pin-btn";
-			const helperText = chat.helperUsername ? `Helfer: ${chat.helperUsername}` : "Helfer noch nicht zugewiesen";
-			div.textContent = `Chat mit ${chat.askerUsername} (${helperText})`;
-
-			// Chat öffnen
-			div.onclick = () => openExistingChat(chat.chatId, chat.subject, chat.content);
-
-			// Nachricht löschen (nach Index)
-			const delMsgBtn = document.createElement("button");
-			delMsgBtn.textContent = "Nachricht löschen";
-			delMsgBtn.className = "btn";
-			delMsgBtn.onclick = async () => {
-				const index = prompt("Index der Nachricht zum Löschen?");
-				if (index === null) return;
-				await apiFetch(`/admin/chat/message/delete?chatId=${chat.chatId}&index=${index}`, { method: "POST" });
-				await loadAdmin();
-			};
-			div.appendChild(delMsgBtn);
-
-			// Gesamten Chat löschen
-			const delChatBtn = document.createElement("button");
-			delChatBtn.textContent = "Chat löschen";
-			delChatBtn.className = "btn";
-			delChatBtn.onclick = async () => {
-				if (!confirm("Gesamten Chat löschen?")) return;
-				await apiFetch(`/admin/chat/chat/delete?chatId=${chat.chatId}`, { method: "POST" });
-				await loadAdmin();
-			};
-			div.appendChild(delChatBtn);
-
-			container.appendChild(div);
-		});
-
-		// 2️⃣ Archivierte Chats
-		const archHeader = document.createElement("h3");
-		archHeader.textContent = "Archivierte Chats";
-		container.appendChild(archHeader);
-
-		const archived = await apiFetch("/admin/chat/archived");
-		archived.forEach(chatId => {
-			const div = document.createElement("div");
-			div.className = "pin-btn";
-			div.textContent = `Archivierter Chat: ${chatId}`;
-
-			const loadBtn = document.createElement("button");
-			loadBtn.textContent = "Anzeigen";
-			loadBtn.className = "btn";
-			loadBtn.onclick = async () => {
-				const chat = await apiFetch(`/admin/chat/archived/load?chatId=${chatId}`);
-				console.log(chat); // hier kannst du Meta + Nachrichten darstellen
-			};
-			div.appendChild(loadBtn);
-
-			const deleteBtn = document.createElement("button");
-			deleteBtn.textContent = "Archiv löschen";
-			deleteBtn.className = "btn";
-			deleteBtn.onclick = async () => {
-				if (!confirm("Archivierten Chat löschen?")) return;
-				await apiFetch(`/admin/chat/archived/delete?chatId=${chatId}`, { method: "POST" });
-				await loadAdmin();
-			};
-			div.appendChild(deleteBtn);
-
-			container.appendChild(div);
-		});
-
-	} catch (err) {
-		console.error(err);
-		container.textContent = "Fehler beim Laden des Adminbereichs.";
-	}
-}
-
-async function assignHelperToChat(questionId, askerUsername) {
-	try {
-		if (!askerUsername) {
-			console.error("askerUsername fehlt!");
-			return;
-		}
-
-		// 1️⃣ Chat erstellen
-		const chat = await apiFetch("/chat/create", {
-			method: "POST",
-			headers: { "Content-Type": "application/x-www-form-urlencoded", "Authorization": token },
-			body: new URLSearchParams({ questionId: String(questionId) })
-		});
-
-		if (!chat.chatId) {
-			console.error("Chat wurde nicht erstellt!", chat);
-			await showHulpPopup("Fehler beim Erstellen des Chats!");
-			return;
-		}
-
-		// 2️⃣ Helfer zuweisen
-		const assignedChat = await apiFetch("/chat/assign-helper", {
-			method: "POST",
-			headers: { "Content-Type": "application/x-www-form-urlencoded", "Authorization": token },
-			body: new URLSearchParams({ chatId: chat.chatId, askerUsername: String(askerUsername) })
-		});
-
-		console.log("Helfer zugewiesen:", assignedChat);
-		await showHulpPopup("Du bist jetzt Helfer!");
-		loadFragen(); // UI aktualisieren
-		openExistingChat(assignedChat.chatId, assignedChat.subject, assignedChat.content);
-
-	} catch (err) {
-		console.error("Fehler beim Helfer zuweisen:", err);
-		await showHulpPopup("Fehler beim Helfer zuweisen!");
-	}
-}
-
-function openUserPanel() {
-	if (!token) {
-		// Login anzeigen
-		showSection("home");
-		document.getElementById("loginArea").style.display = "block";
-		document.getElementById("userArea").style.display = "none";
-		return;
-	}
-
-	// Benutzerprofil öffnen
-	document.getElementById("profileUsername").textContent =
-		localStorage.getItem("username") || "Unbekannt";
-
-	document.getElementById("profileRank").textContent =
-		localStorage.getItem("role") || "User";
-
-	loadUserStats();
-	showSection("userPanel");
-}
-
-async function loadUserStats() {
-	try {
-		const data = await apiFetch("/users/stats");
-		document.getElementById("askedCount").textContent = data.asked || 0;
-		document.getElementById("answeredCount").textContent = data.answered || 0;
-	} catch (err) {
-		console.error("Fehler beim Laden der Nutzerstatistik:", err);
-	}
-}
-
-async function changePassword() {
-	const p1 = document.getElementById("newPw1").value;
-	const p2 = document.getElementById("newPw2").value;
-
-	if (!p1 || !p2) return showHulpPopup("Bitte beide Felder ausfüllen!");
-	if (p1 !== p2) return showHulpPopup("Passwörter stimmen nicht überein!");
-	if (p1.length < 4) return showHulpPopup("Mindestens 4 Zeichen!");
-
-	const username = localStorage.getItem("username");
-	const token = localStorage.getItem("token");
-
-	try {
-		await apiFetch("/users/changepassword", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/x-www-form-urlencoded",
-				"Authorization": token
-			},
-			body: new URLSearchParams({
-				username: username,
-				newPassword: p1
-			})
-		});
-
-		showHulpPopup("Passwort geändert!");
-		document.getElementById("newPw1").value = "";
-		document.getElementById("newPw2").value = "";
-
-	} catch (err) {
-		console.error(err);
-		showHulpPopup("Fehler beim Ändern!");
-	}
-}
-
-async function loadLeaderboard() {
-	if (!token) return showHulpPopup("Bitte einloggen!");
-
-	try {
-		const data = await apiFetch("/users/leaderboard");
-
-		const tbody = document.getElementById("leaderboardBody");
-		tbody.innerHTML = "";
-
-		// Top 50
-		data.leaderboard.forEach((entry, index) => {
-			const tr = document.createElement("tr");
-
-			const tdRank = document.createElement("td");
-			tdRank.textContent = index + 1;
-			const tdUser = document.createElement("td");
-			tdUser.textContent = entry.username;
-			const tdPoints = document.createElement("td");
-			tdPoints.textContent = entry.points;
-
-			tr.appendChild(tdRank);
-			tr.appendChild(tdUser);
-			tr.appendChild(tdPoints);
-
-			// Eigenen User hervorheben
-			if (entry.username === localStorage.getItem("username")) {
-				tr.style.backgroundColor = "#ffd70040";
-				tr.style.fontWeight = "bold";
-			}
-
-			tbody.appendChild(tr);
-		});
-
-		// Eigenen Platz anzeigen
-		const myPos = data.me;
-		document.getElementById("myLeaderboardPosition").textContent =
-			`Dein Platz: ${myPos.position > 0 ? myPos.position : "-"} | Punkte: ${myPos.points}`;
-
-	} catch (err) {
-		console.error(err);
-		showHulpPopup("Fehler beim Laden der Rangliste!");
 	}
 }
