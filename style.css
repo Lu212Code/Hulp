@@ -345,3 +345,69 @@ input {
   margin-bottom:15px;
   font-size:1em;
 }
+/* ---------------------------------------------------------
+   🔹 Chat-Style (WhatsApp-Style)
+--------------------------------------------------------- */
+#chatList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  overflow-y: auto;
+  max-height: 500px; /* optional, je nach Chat-Container */
+  background-color: #f5f5f5; /* leicht grauer Hintergrund */
+  border-radius: 8px;
+}
+
+/* Chat Bubble Basis */
+.chat-bubble {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 15px;
+  word-wrap: break-word;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  cursor: pointer; /* Hinweis, dass man klicken kann */
+  transition: background-color 0.2s;
+}
+
+/* Eigene Nachrichten (rechts) */
+.chat-right {
+  align-self: flex-end;
+  background-color: #DCF8C6; /* WhatsApp-grünlich */
+  border-top-right-radius: 0;
+}
+
+/* Andere Nachrichten (links) */
+.chat-left {
+  align-self: flex-start;
+  background-color: #FFFFFF;
+  border-top-left-radius: 0;
+  border: 1px solid #e0e0e0;
+}
+
+/* Hover-Effekt für Meldung */
+.chat-bubble:hover {
+  background-color: #e0f0ff;
+}
+
+/* Username über jeder Nachricht */
+.chat-username {
+  font-size: 0.75rem;
+  font-weight: bold;
+  margin-bottom: 4px;
+  color: #555;
+}
+
+/* Scrollbar Styling (optional) */
+#chatList::-webkit-scrollbar {
+  width: 6px;
+}
+
+#chatList::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 3px;
+}
+
+#chatList::-webkit-scrollbar-track {
+  background: transparent;
+}
