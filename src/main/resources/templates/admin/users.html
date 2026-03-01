@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Hulp Admin – Benutzerverwaltung</title>
+    <style>
+        :root { --primary: #b71c1c; --bg: #f4f7f6; --text: #2c3e50; --sidebar: #1e293b; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; color: var(--text); }
+        
+        /* Sidebar Admin */
+        .admin-sidebar { width: 250px; background: var(--sidebar); height: 100vh; color: white; position: fixed; }
+        .admin-sidebar h2 { padding: 20px; font-size: 1.2em; border-bottom: 1px solid #334155; margin: 0; }
+        .admin-sidebar a { display: block; padding: 15px 20px; color: #cbd5e1; text-decoration: none; transition: 0.3s; }
+        .admin-sidebar a:hover { background: #334155; color: white; }
+
+        .content { margin-left: 250px; padding: 40px; width: 100%; }
+        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; padding: 12px; border-bottom: 2px solid #eee; color: #64748b; font-size: 0.9em; }
+        td { padding: 12px; border-bottom: 1px solid #eee; }
+        
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; }
+        .badge-admin { background: #fee2e2; color: #b91c1c; }
+        .badge-user { background: #f1f5f9; color: #475569; }
+
+        textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: none; margin-bottom: 10px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-danger { background: #ef4444; color: white; font-size: 0.8em; }
+
+        /* Passwort-Tabelle nach Import */
+        .import-result { background: #ecfdf5; border: 1px solid #10b981; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        .admin-sidebar { 
+		    width: 250px; 
+		    background: var(--sidebar); 
+		    height: 100vh; 
+		    color: white; 
+		    position: fixed; 
+		    display: flex;         /* Neu: Flexbox aktivieren */
+		    flex-direction: column; /* Neu: Elemente untereinander */
+		}
+    </style>
+</head>
+<body>
+
+	<div class="admin-sidebar">
+	    <h2>Hulp Administration</h2>
+	    <div style="flex-grow: 1;">
+	        <a href="/admin/users">👤 Benutzer-Management</a>
+	        <a href="/admin/chats">💬 Chat-Moderation</a>
+	        <a href="/">🏠 Zurück zur App</a>
+	    </div>
+	
+	    <div style="padding: 15px 20px; border-top: 1px solid #334155; font-size: 0.75em; opacity: 0.5;">
+	        <a th:href="@{/datenschutz}" style="display: inline; padding: 0; color: white;">Datenschutz</a> | 
+	        <a th:href="@{/agb}" style="display: inline; padding: 0; color: white;">AGB</a> | 
+	        <a th:href="@{/nutzungsbedingungen}" style="display: inline; padding: 0; color: white;">Nutzung</a>
+	    </div>
+	</div>
+
+    <div class="content">
+        <h1>Benutzerverwaltung</h1>
+
+		<div class="card">
+		    <h3>Massen-Import & PDF Export</h3>
+		    <p style="font-size: 0.9em; color: #666;">Namen einfügen -> Accounts werden erstellt -> PDF startet automatisch.</p>
+		    <form th:action="@{/admin/users/import}" method="post">
+		        <textarea name="namenListe" placeholder="Max Mustermann&#10;Erika Musterfrau"></textarea>
+		        <button type="submit" class="btn btn-primary">🚀 Accounts erstellen & PDF laden</button>
+		    </form>
+		</div>
+
+        <div th:if="${newUsers}" class="import-result">
+            <h3>🔑 Neu generierte Zugangsdaten</h3>
+            <p>Bitte kopieren: Diese Passwörter werden nicht noch einmal angezeigt!</p>
+            <table>
+                <tr th:each="entry : ${newUsers}">
+                    <td th:text="${entry.key}">Name</td>
+                    <td style="font-family: monospace; font-weight: bold;" th:text="${entry.value}">Passwort</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h3>Alle registrierten Benutzer</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Benutzername</th>
+                        <th>Rolle</th>
+                        <th>Punkte</th>
+                        <th>Aktion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="user : ${users}">
+                        <td th:text="${user.id}">1</td>
+                        <td th:text="${user.username}" style="font-weight: bold;">Name</td>
+                        <td>
+                            <span th:text="${user.role}" 
+                                  th:classappend="${user.role == 'admin' ? 'badge badge-admin' : 'badge badge-user'}">
+                            </span>
+                        </td>
+                        <td th:text="${user.punkte}">0</td>
+                        <td>
+                            <form th:action="@{/admin/users/delete/{id}(id=${user.id})}" method="post" onsubmit="return confirm('User wirklich löschen?')">
+                                <button class="btn btn-danger">Löschen</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Hulp – Profil</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div th:replace="~{fragments :: sidebar}"></div>
+
+    <div class="main">
+        <div th:replace="~{fragments :: topbar}"></div>
+
+        <div class="section">
+    <h2>Dein Profil</h2>
+    
+    <div style="background: #1c1c1c; padding: 20px; border-radius: 12px; border-left: 5px solid #b71c1c;">
+        <p>Benutzername: <b th:text="${#authentication.name}" style="color: white;">Name</b></p>
+        <p>Rang: 
+			<span th:text="${role}" 
+			      th:style="${role == 'admin' ? 'color: #b71c1c; font-weight: bold;' : 'color: #aaa;'}">
+			    Standard
+			</span>
+        </p>
+        <p>Punkte: <b th:text="${punkte}" style="color: #4caf50;">0</b></p>
+    </div>
+
+	<div class="card" style="margin-top: 20px; background: #1c1c1c; padding: 20px; border: 1px solid #333;">
+		<h3>🔐 Passwort ändern</h3>
+		<form th:action="@{/profil/passwort-aendern}" method="post" style="display: flex; gap: 10px; margin-top: 10px;">
+			<input type="password" name="neuesPasswort" placeholder="Neues Passwort (min. 5 Zeichen)" required 
+				style="flex: 1; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 4px;">
+			<button type="submit" class="btn">Speichern</button>
+		</form>
+		<p th:if="${param.success}" style="color: #4CAF50; font-size: 0.9em; margin-top: 10px;">✔ Passwort wurde geändert.</p>
+	</div>
+
+    <h3 style="margin-top: 20px;">Statistik</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div style="background: #252525; padding: 15px; border-radius: 8px; text-align: center;">
+            <p style="color: #b0b0b0; font-size: 0.9em; margin-bottom: 5px;">Gestellte Fragen</p>
+            <span style="font-size: 1.5em; font-weight: bold; color: white;" th:text="${askedCount}">0</span>
+        </div>
+        <div style="background: #252525; padding: 15px; border-radius: 8px; text-align: center;">
+            <p style="color: #b0b0b0; font-size: 0.9em; margin-bottom: 5px;">Beantwortete Fragen</p>
+            <span style="font-size: 1.5em; font-weight: bold; color: white;" th:text="${helpedCount}">0</span>
+        </div>
+    </div>
+    
+	<div th:if="${role == 'admin'}" style="margin-top: 20px; padding: 15px; background: #334155; border-radius: 8px;">
+	    <h4 style="color: white; margin-top: 0;">Admin-Bereich</h4>
+	    <a href="/admin/users" class="btn" style="background: #b71c1c; color: white; padding: 10px; display: inline-block; border-radius: 4px;">
+	        ⚙️ Administration öffnen
+	    </a>
+	</div>
+
+    </div>
+</body>
+</html>

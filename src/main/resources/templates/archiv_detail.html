@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Archiv – Chat Verlauf</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div th:replace="~{fragments :: sidebar}"></div>
+    <div class="main">
+        <div th:replace="~{fragments :: topbar}"></div>
+        <div class="section">
+            <div style="background: #1c1c1c; padding: 20px; border-radius: 12px; border-bottom: 3px solid #444;">
+                <h2 th:text="${frage.fach} + ' - Archiv'"></h2>
+                <p th:text="${frage.text}" style="font-style: italic;"></p>
+                <p style="color: #666; font-size: 0.8em;">Status: Gelöst & Anonymisiert</p>
+            </div>
+
+            <div id="chatList" style="overflow-y: auto; max-height: 600px; display: flex; flex-direction: column; margin-top: 20px;">
+                <div th:each="msg : ${messages}" 
+                     th:classappend="${msg.sender == frage.ersteller} ? 'chat-left' : 'chat-right'" 
+                     class="chat-bubble">
+                    <div class="chat-username" th:text="${msg.sender == frage.ersteller ? 'Frager' : 'Helfer'}"></div>
+                    <div th:text="${msg.text}"></div>
+                </div>
+            </div>
+            
+            <a href="/" class="btn" style="margin-top: 20px; background: #444; text-align: center; text-decoration: none;">Zurück zur Übersicht</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<div th:fragment="sidebar" class="sidebar">
+    <th:block th:if="${#authentication.name != 'anonymousUser'}">
+        <a href="/" class="sidebar-link">🏠 <span>Startseite</span></a>
+        <a href="/fragen" class="sidebar-link">📚 <span>Fragen</span></a>
+        <a href="/nachhilfe" class="sidebar-link">📚 <span>Nachhilfe</span></a>
+        <a href="/fragen/neu" class="sidebar-link">➕ <span>Neuer Beitrag</span></a>
+        <a href="/meine-chats" class="sidebar-link">💬 <span>Meine Chats</span></a>
+        <a href="/leaderboard" class="sidebar-link">🏆 <span>Leaderboard</span></a>
+        <a href="/profil" class="sidebar-link">🏆 <span>Profil</span></a>
+    </th:block>
+
+    <div th:if="${#authentication.name == 'anonymousUser'}" style="padding: 10px; color: var(--text-dim); text-align: center;">
+        Willkommen!
+    </div>
+
+    <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid #333; font-size: 0.75em; opacity: 0.5;">
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+            <a th:href="@{/datenschutz}" style="color: white; text-decoration: none;">Datenschutz</a>
+            <span>|</span>
+            <a th:href="@{/nutzungsbedingungen}" style="color: white; text-decoration: none;">Nutzung</a>
+            <span>|</span>
+            <a th:href="@{/agb}" style="color: white; text-decoration: none;">AGB</a>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="topbar" class="topbar">
+    <div th:if="${#authentication.name == 'anonymousUser'}">
+        <a href="/login" class="btn">Login</a>
+    </div>
+    <div th:unless="${#authentication.name == 'anonymousUser'}">
+        Eingeloggt als <span th:text="${#authentication.name}"></span>
+        <a href="/logout" class="btn">Logout</a>
+    </div>
+</div>
+
+</body>
+</html>

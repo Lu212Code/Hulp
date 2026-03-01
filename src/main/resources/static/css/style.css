@@ -1,0 +1,195 @@
+/* --- 1. Variablen & Reset --- */
+:root {
+  --bg-dark: #121212;
+  --bg-panel: #1c1c1c;
+  --bg-input: #2a2a2a;
+  --primary: #b71c1c;
+  --primary-hover: #d32f2f;
+  --text-main: #ffffff;
+  --text-dim: #b0b0b0;
+  --accent-red: #ff5252;
+  --shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+
+body { 
+  display: flex; 
+  height: 100vh; 
+  background: var(--bg-dark); 
+  color: var(--text-main); 
+  overflow: hidden; 
+}
+
+/* --- 2. Sidebar (Fest links) --- */
+.sidebar {
+  width: 260px;
+  background: var(--bg-panel);
+  display: flex;
+  flex-direction: column;
+  padding: 30px 20px;
+  gap: 15px;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.7);
+  z-index: 100;
+}
+
+/* Sidebar Links (Ehemals Buttons) */
+.sidebar-link, .sidebar button {
+  background: var(--primary);
+  border: none;
+  color: white;
+  padding: 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+  text-transform: uppercase;
+  transition: 0.2s;
+}
+
+.sidebar-link:hover, .sidebar button:hover {
+  background: var(--primary-hover);
+  transform: scale(1.03);
+}
+
+/* --- 3. Main Bereich --- */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 40px;
+  overflow-y: auto;
+  background: linear-gradient(180deg, #121212 0%, #1a1a1a 100%);
+}
+
+.topbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 30px;
+  gap: 15px;
+}
+
+/* --- 4. Content & Sektionen --- */
+.section { 
+  display: flex; /* WICHTIG: Kein display:none mehr! */
+  flex-direction: column; 
+  gap: 20px; 
+  max-width: 900px;
+}
+
+.section h2 { 
+  color: var(--accent-red); 
+  font-size: 1.8em; 
+  border-left: 5px solid var(--primary); 
+  padding-left: 15px;
+  margin-bottom: 10px;
+}
+
+/* Karten / Fragen-Cards */
+.card, .pin-btn {
+  background: #1e1e1e;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #333;
+  transition: 0.2s;
+  text-decoration: none;
+  color: white;
+}
+
+.card:hover {
+  border-color: var(--primary);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+}
+
+/* --- 5. Formular-Elemente --- */
+input, select, textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: var(--bg-input);
+  color: white;
+  font-size: 1em;
+  margin-bottom: 10px;
+}
+
+textarea { resize: vertical; min-height: 120px; }
+
+.btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  text-transform: uppercase;
+  transition: 0.2s;
+}
+
+.btn:hover { background: var(--primary-hover); transform: scale(1.02); }
+
+/* --- 6. Tabellen (Leaderboard) --- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-panel);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+th, td { padding: 15px; text-align: left; border-bottom: 1px solid #333; }
+th { background: var(--primary); color: white; }
+tr:hover { background: rgba(255,255,255,0.05); }
+
+/* --- 7. Chat Styles --- */
+#chatList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  background: #181818;
+  border-radius: 12px;
+  border: 1px solid var(--primary);
+  height: 400px;
+  overflow-y: auto;
+}
+
+.chat-bubble {
+  max-width: 80%;
+  padding: 12px;
+  border-radius: 12px;
+  position: relative;
+}
+
+.chat-left { align-self: flex-start; background: #2a2a2a; border-bottom-left-radius: 2px; }
+.chat-right { align-self: flex-end; background: var(--primary); border-bottom-right-radius: 2px; }
+
+/* --- 8. Mobile Optimierung --- */
+@media (max-width: 768px) {
+  body { flex-direction: column; }
+  .sidebar {
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 10px;
+  }
+  .sidebar-link span { display: none; } /* Nur Emojis mobil */
+  .main { padding: 20px; }
+}
+
+.userCorner {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: var(--primary);
+  padding: 10px 20px;
+  border-radius: 30px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Hulp – Chat</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        /* Modal Styles */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
+        .modal-content { background: #252525; margin: 10% auto; padding: 25px; border-radius: 15px; width: 50%; border: 1px solid #444; color: white; }
+        .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0; padding: 10px; border: 1px solid #333; border-radius: 8px; background: #1a1a1a; }
+        .tag { background: #b71c1c; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.85em; display: flex; align-items: center; gap: 8px; }
+        .tag span { cursor: pointer; font-weight: bold; }
+        .manual-input { display: flex; gap: 10px; margin-top: 10px; }
+        .manual-input input { flex-grow: 1; padding: 8px; border-radius: 5px; border: 1px solid #444; background: #111; color: white; }
+        .chat-bubble { max-width: 70%; margin: 10px; padding: 12px; border-radius: 15px; position: relative; }
+		.chat-left { align-self: flex-start; background: #333; color: white; border-bottom-left-radius: 2px; }
+		.chat-right { align-self: flex-end; background: #b71c1c; color: white; border-bottom-right-radius: 2px; }
+		.chat-username { font-size: 0.75em; margin-bottom: 4px; opacity: 0.7; }
+		/* Erhöht den Abstand zwischen Header, Chat und Eingabe */
+		.section { 
+		    display: flex; 
+		    flex-direction: column; 
+		    gap: 20px; /* Einheitlicher Abstand zwischen den Hauptblöcken */
+		    height: 85vh; /* Damit der Chat fast die ganze Seite füllt */
+		}
+		
+		#chatList { 
+		    flex-grow: 1; /* Nimmt den restlichen Platz ein */
+		    padding: 10px; 
+		    background: rgba(0,0,0,0.05); 
+		    border-radius: 8px;
+		    margin-bottom: 10px;
+		}
+		
+		/* Verhindert, dass die Bubbles am Rand kleben */
+		.chat-bubble { 
+		    margin-bottom: 15px !important; 
+		}
+		
+		/* Eingabebereich fixieren */
+		#messageForm {
+		    margin-top: auto;
+		    padding-top: 10px;
+		}
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments :: sidebar}"></div>
+
+    <div class="main">
+    <div th:replace="~{fragments :: topbar}"></div>
+
+    <div class="section">
+        <div style="background: #1c1c1c; padding: 20px; border-radius: 12px; border-bottom: 3px solid #b71c1c; flex-shrink: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <h2 th:text="${frage.fach} + ' - Klasse ' + ${frage.klasse}">Mathe - Klasse 10</h2>
+                
+                <div th:if="${frage.beitragTyp != 'FRAGE'}" 
+                     style="background: #b71c1c; color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold;">
+                    <span th:text="${#strings.replace(frage.beitragTyp, '_', ' ')}"></span>: 
+                    <span th:text="${frage.preis} + '€'"></span>
+                </div>
+            </div>
+            <p id="originalTask" th:text="${frage.text}" style="margin-bottom: 10px; font-style: italic;">Die ursprüngliche Frage...</p>
+            <div style="display: flex; gap: 20px; font-size: 0.9em; color: #b0b0b0;">
+                <span>👤 Ersteller: <b th:text="${frage.ersteller}" style="color: white;">Name</b></span>
+                <span>🛠 Partner: <b th:text="${helfer != null ? helfer : 'Wartet auf Verbindung...'}" style="color: white;">Name</b></span>
+            </div>
+        </div>
+
+        <div id="chatList" style="overflow-y: auto; display: flex; flex-direction: column;">
+            <div th:each="msg : ${messages}" 
+                 th:classappend="${msg.sender == #authentication.name} ? 'chat-right' : 'chat-left'" 
+                 class="chat-bubble">
+                <div class="chat-username" th:text="${msg.sender}">Sender</div>
+                <div class="msg-content" th:text="${msg.text}">Nachrichtentext</div>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;">
+            <form id="messageForm" style="display: flex; gap: 10px;">
+                <input id="messageInput" name="message" placeholder="Schreibe eine Nachricht..." required autocomplete="off" style="flex-grow: 1; padding: 12px; border-radius: 8px; border: 1px solid #ddd;">
+                <button type="submit" class="btn" style="padding: 0 25px;">Senden</button>
+            </form>
+
+            <button th:if="${#authentication.name == frage.ersteller}" 
+                    onclick="openArchiveModal()" class="btn" style="background: #444; width: 100%; padding: 10px;">
+                Frage beendet & Archivieren
+            </button>
+        </div>
+    </div>
+</div>
+
+    <div id="archiveModal" class="modal">
+        <div class="modal-content">
+            <h3>🛡 Chat anonymisieren</h3>
+            <p style="color: #b0b0b0; font-size: 0.9em;">Folgende private Daten wurden erkannt und werden im Archiv ersetzt:</p>
+            
+            <div id="tagContainer" class="tag-container"></div>
+
+            <div class="manual-input">
+                <input type="text" id="manualTagInput" placeholder="Weiteres Wort anonymisieren...">
+                <button type="button" onclick="addManualTag()" class="btn" style="padding: 5px 15px;">Hinzufügen</button>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 25px;">
+                <button onclick="submitArchiv()" class="btn" style="background: #2e7d32; width: 100%;">
+                    ✔ Daten bereinigen & Archivieren
+                </button>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="finishWithoutArchiving()" class="btn" style="background: #b71c1c; flex-grow: 1;">
+                        ✖ Beenden ohne Archivierung
+                    </button>
+                    <button onclick="document.getElementById('archiveModal').style.display='none'" class="btn" style="background: #444;">
+                        Abbrechen
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+    const frageId = [[${frage.id}]];
+    const currentUser = [[${#authentication.name}]];
+    const chatList = document.getElementById('chatList');
+    const messageForm = document.getElementById('messageForm');
+    const messageInput = document.getElementById('messageInput');
+    
+    let detectedSensitiveData = new Set();
+
+    // --- WebSocket Logic ---
+    const socket = new SockJS('/ws-chat');
+    const stompClient = Stomp.over(socket);
+    stompClient.debug = null; 
+
+    stompClient.connect({}, function (frame) {
+        stompClient.subscribe('/topic/messages/' + frageId, function (response) {
+            const msg = JSON.parse(response.body);
+            appendMessage(msg);
+        });
+    });
+
+    messageForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const messageText = messageInput.value.trim();
+        if (messageText && stompClient.connected) {
+            stompClient.send("/app/chat.send/" + frageId, {}, JSON.stringify({ text: messageText }));
+            messageInput.value = '';
+        }
+    });
+
+    function appendMessage(msg) {
+        const div = document.createElement('div');
+        div.className = 'chat-bubble ' + (msg.sender === currentUser ? 'chat-right' : 'chat-left');
+        div.innerHTML = `<div class="chat-username">${msg.sender}</div><div class="msg-content">${msg.text}</div>`;
+        chatList.appendChild(div);
+        chatList.scrollTop = chatList.scrollHeight;
+    }
+
+    // --- Archivierungs Logic ---
+
+	function openArchiveModal() {
+	    detectedSensitiveData.clear();
+	    const allText = Array.from(document.querySelectorAll('.msg-content, #originalTask'))
+	                         .map(el => el.innerText).join(" ");
+	
+	    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+	    const phoneRegex = /\+?\d{7,15}/g;
+	    
+	    (allText.match(emailRegex) || []).forEach(item => detectedSensitiveData.add(item));
+	    (allText.match(phoneRegex) || []).forEach(item => detectedSensitiveData.add(item));
+	    
+	    // Namen der Beteiligten (Null-Safe)
+	    const ersteller = [[${frage.ersteller}]];
+	    const helfer = [[${helfer}]]; // Thymeleaf rendert hier 'null' wenn leer
+	    
+	    if(ersteller) detectedSensitiveData.add(ersteller);
+	    if(helfer) detectedSensitiveData.add(helfer);
+	
+	    renderTags();
+	    document.getElementById('archiveModal').style.display = 'block';
+	}
+
+    function renderTags() {
+        const container = document.getElementById('tagContainer');
+        container.innerHTML = '';
+        detectedSensitiveData.forEach(val => {
+            const tag = document.createElement('div');
+            tag.className = 'tag';
+            tag.innerHTML = `${val} <span onclick="removeTag('${val}')">&times;</span>`;
+            container.appendChild(tag);
+        });
+    }
+
+    function removeTag(val) {
+        detectedSensitiveData.delete(val);
+        renderTags();
+    }
+
+    function addManualTag() {
+        const input = document.getElementById('manualTagInput');
+        if(input.value.trim()) {
+            detectedSensitiveData.add(input.value.trim());
+            input.value = '';
+            renderTags();
+        }
+    }
+
+    function submitArchiv() {
+        // Hier schicken wir den Bereinigungsbefehl ans Backend
+        const sensitiveList = Array.from(detectedSensitiveData);
+        
+        fetch(`/chat/archivieren/${frageId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(sensitiveList)
+        }).then(res => {
+            if(res.ok) window.location.href = "/";
+        });
+    }
+
+    chatList.scrollTop = chatList.scrollHeight;
+    
+    function finishWithoutArchiving() {
+        if(confirm("Möchtest du die Frage wirklich beenden, ohne sie zu archivieren? Der Chat wird dann für niemanden mehr sichtbar sein.")) {
+            fetch(`/chat/beenden-ohne-archiv/${frageId}`, {
+                method: 'POST'
+            }).then(res => {
+                if(res.ok) window.location.href = "/";
+            });
+        }
+    }
+</script>
+</body>
+</html>

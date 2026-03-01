@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Hulp – Startseite</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div th:replace="~{fragments :: sidebar}"></div>
+
+    <div class="main">
+        <div th:replace="~{fragments :: topbar}"></div>
+
+        <div class="section">
+            <h1>Hulp</h1>
+            <p>Hulp ist ein einfaches Nachhilfe-Board...</p>
+            
+            <h2>📦 Archivierte Fragen</h2>
+            <div class="filter-bar">
+                <form action="/" method="get">
+                    <input name="search" placeholder="Archiv durchsuchen…">
+                </form>
+            </div>
+			<div id="fragenListe">
+			<div th:each="frage : ${archivedMessages}" class="archive-item" style="background: #252525; margin-bottom: 10px; padding: 15px; border-radius: 8px;">
+			    <h3 th:text="${frage.fach} + ' - ' + ${frage.klasse}"></h3>
+			    <p th:text="${#strings.abbreviate(frage.text, 100)}"></p>
+			    
+			    <a th:href="@{/archiv/chat/{id}(id=${frage.id})}" class="btn" style="background: #b71c1c; display: inline-block; text-decoration: none; padding: 5px 15px;">
+			        Lösung ansehen
+			    </a>
+			</div>
+			</div>
+        </div>
+    </div>
+</body>
+</html>

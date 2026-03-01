@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Hulp Admin – Chat Moderation</title>
+    <style>
+        :root { --primary: #b71c1c; --bg: #f4f7f6; --sidebar: #1e293b; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; }
+        .admin-sidebar { width: 250px; background: var(--sidebar); height: 100vh; color: white; position: fixed; }
+        .admin-sidebar h2 { padding: 20px; font-size: 1.2em; border-bottom: 1px solid #334155; margin: 0; }
+        .admin-sidebar a { display: block; padding: 15px 20px; color: #cbd5e1; text-decoration: none; }
+        .admin-sidebar a:hover { background: #334155; color: white; }
+        .content { margin-left: 250px; padding: 40px; width: 100%; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
+        .status-open { color: #f59e0b; font-weight: bold; }
+        .status-closed { color: #10b981; font-weight: bold; }
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
+        .admin-sidebar { 
+		    width: 250px; 
+		    background: var(--sidebar); 
+		    height: 100vh; 
+		    color: white; 
+		    position: fixed; 
+		    display: flex;         /* Neu: Flexbox aktivieren */
+		    flex-direction: column; /* Neu: Elemente untereinander */
+		}
+    </style>
+</head>
+<body>
+	<div class="admin-sidebar">
+	    <h2>Hulp Administration</h2>
+	    <div style="flex-grow: 1;">
+	        <a href="/admin/users">👤 Benutzer-Management</a>
+	        <a href="/admin/chats">💬 Chat-Moderation</a>
+	        <a href="/">🏠 Zurück zur App</a>
+	    </div>
+	
+	    <div style="padding: 15px 20px; border-top: 1px solid #334155; font-size: 0.75em; opacity: 0.5;">
+	        <a th:href="@{/datenschutz}" style="display: inline; padding: 0; color: white;">Datenschutz</a> | 
+	        <a th:href="@{/agb}" style="display: inline; padding: 0; color: white;">AGB</a> | 
+	        <a th:href="@{/nutzungsbedingungen}" style="display: inline; padding: 0; color: white;">Nutzung</a>
+	    </div>
+	</div>
+
+    <div class="content">
+        <h1>Chat-Moderation</h1>
+        <div class="card">
+            <h3>Alle aktiven und archivierten Chats</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Fach/Klasse</th>
+                        <th>Frage</th>
+                        <th>Ersteller</th>
+                        <th>Status</th>
+                        <th>Aktion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="f : ${fragen}">
+                        <td th:text="${f.id}">1</td>
+                        <td th:text="${f.fach + ' (' + f.klasse + ')'}">Mathe (10)</td>
+                        <td th:text="${f.text}">Wie geht...?</td>
+                        <td th:text="${f.ersteller}">Max</td>
+                        <td>
+                            <span th:class="${f.geloest ? 'status-closed' : 'status-open'}" 
+                                  th:text="${f.geloest ? 'Archiviert' : 'Offen'}"></span>
+                        </td>
+                        <td>
+                            <form th:action="@{/admin/chats/delete/{id}(id=${f.id})}" method="post" onsubmit="return confirm('Chat unwiderruflich löschen?')">
+                                <button class="btn-delete">Löschen</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

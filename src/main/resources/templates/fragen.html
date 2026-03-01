@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Hulp – Fragen</title>
+    <link rel="stylesheet" th:href="@{css/style.css}">
+</head>
+<body>
+    <div th:replace="~{fragments :: sidebar}"></div>
+
+    <div class="main">
+        <div th:replace="~{fragments :: topbar}"></div>
+
+        <div class="section">
+        <div th:if="${param.error}" style="background: #fee2e2; border: 1px solid #ef4444; color: #b91c1c; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+		    <span>⚠️</span>
+		    <span th:if="${param.error[0] == 'self'}">Du kannst dich nicht selbst kontaktieren oder deine eigene Frage beantworten.</span>
+		    <span th:if="${param.error[0] == 'selfhelp'}">Du kannst deine eigene Anzeige nicht als Helfer übernehmen.</span>
+		</div>
+		
+		<div th:if="${param.deleted}" style="background: #ecfdf5; border: 1px solid #10b981; color: #047857; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+		    Der Beitrag wurde erfolgreich gelöscht.
+		</div>
+    <h2>Fragen</h2>
+
+<div class="filter-bar" style="background: #1c1c1c; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <form action="/fragen" method="get" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        
+        <input name="search" th:value="${param.search}" placeholder="Text suchen…" 
+               style="flex: 2; min-width: 150px; padding: 8px; border-radius: 4px; border: 1px solid #444; background: #2a2a2a; color: white;"> 
+        
+        <select name="fach" style="flex: 1; min-width: 120px; padding: 8px; border-radius: 4px; border: 1px solid #444; background: #2a2a2a; color: white;">
+            <option value="">Alle Fächer</option>
+            <option th:each="f : ${allFaecher}" 
+                    th:value="${f}" 
+                    th:text="${f}" 
+                    th:selected="${f == param.fach}"></option>
+        </select> 
+
+        <select name="klasse" style="flex: 0.5; min-width: 80px; padding: 8px; border-radius: 4px; border: 1px solid #444; background: #2a2a2a; color: white;">
+            <option value="">Alle</option>
+            <option th:each="k : ${#numbers.sequence(5, 13)}" 
+                    th:value="${k}" 
+                    th:text="${k}" 
+                    th:selected="${#strings.equals(k, param.klasse)}"></option>
+        </select>
+
+        <button type="submit" class="btn" style="height: 38px; padding: 0 20px; margin: 0;">Filtern</button>
+        <a href="/fragen" style="color: #888; text-decoration: none; font-size: 0.8em; margin-left: 5px;">Filter löschen</a>
+    </form>
+</div>
+
+    <div id="fragenListe">
+    <div th:each="f : ${fragen}" class="card" 
+         style="background: #1c1c1c; border: 1px solid #333; padding: 20px; margin-bottom: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+        
+        <div style="flex: 1;">
+            <b th:text="${f.fach} + ' (Klasse ' + ${f.klasse} + ')'" style="color: #b71c1c; font-size: 1.1em;">Fach</b>
+            <p th:text="${f.text}" style="margin: 10px 0; color: #ddd;"></p>
+            <small style="color: #888;">Von: <span th:text="${f.ersteller}" style="color: #bbb;"></span></small>
+        </div>
+
+        <div style="margin-left: 20px;">
+            <a th:if="${f.ersteller != #authentication.name}" 
+               th:href="@{/chat/start/{id}(id=${f.id})}" 
+               class="btn">Helfen</a>
+
+            <div th:if="${f.ersteller == #authentication.name}" style="display: flex; align-items: center; gap: 10px;">
+                <span style="color: #666; font-style: italic; font-size: 0.9em;">Eigene Frage</span>
+                
+                <form th:action="@{/fragen/delete/{id}(id=${f.id})}" method="post" 
+                      onsubmit="return confirm('Möchtest du deine Frage wirklich löschen?')">
+                    <button type="submit" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.1em;" title="Frage löschen">
+                        🗑️
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${#lists.isEmpty(fragen)}" style="text-align: center; padding: 50px; color: #888; background: #1c1c1c; border-radius: 12px; border: 1px dashed #333;">
+        <p>🔍 Aktuell gibt es keine offenen Fragen in diesem Bereich.</p>
+        <a href="/fragen/neu" style="color: #b71c1c; text-decoration: none; font-weight: bold;">Stelle du die erste Frage!</a>
+    </div>
+</div>
+</div>
+</body>
+</html>

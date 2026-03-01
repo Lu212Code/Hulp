@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hulp – Neuer Beitrag</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .input-group { margin-bottom: 20px; }
+        .price-label { font-weight: bold; color: var(--primary); display: block; margin-bottom: 5px; }
+        #preisBereich { 
+            background: #f8fafc; 
+            padding: 15px; 
+            border-radius: 8px; 
+            border: 1px dashed #cbd5e1;
+            margin-bottom: 20px;
+        }
+        
+        .input-group { margin-bottom: 20px; }
+
+		/* Der Container für den Preis */
+		#preisBereich { 
+		    background: #1c1c1c; /* Dunkel wie die Karten */
+		    padding: 15px; 
+		    border-radius: 12px; 
+		    border: 1px solid #333;
+		    margin-bottom: 20px;
+		}
+		
+		.price-label { font-weight: bold; color: white; display: block; margin-bottom: 10px; }
+		
+		/* --- Der Schieberegler-Look --- */
+		input[type=range] {
+		    -webkit-appearance: none;
+		    width: 100%;
+		    background: transparent;
+		    margin: 15px 0;
+		}
+		
+		/* Die Schiene */
+		input[type=range]::-webkit-slider-runnable-track {
+		    width: 100%;
+		    height: 8px;
+		    background: #333;
+		    border-radius: 10px;
+		}
+		
+		/* Der Knopf */
+		input[type=range]::-webkit-slider-thumb {
+		    -webkit-appearance: none;
+		    height: 20px;
+		    width: 20px;
+		    border-radius: 50%;
+		    background: #b71c1c; /* Dein Hulp-Rot */
+		    cursor: pointer;
+		    margin-top: -6px; /* Zentrierung */
+		    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+		}
+		
+		/* Firefox Support */
+		input[type=range]::-moz-range-track { background: #333; height: 8px; border-radius: 10px; }
+		input[type=range]::-moz-range-thumb { background: #b71c1c; height: 20px; width: 20px; border-radius: 50%; border: none; }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments :: sidebar}"></div>
+
+    <div class="main">
+        <div th:replace="~{fragments :: topbar}"></div>
+
+        <div class="section">
+            <h2>Neuen Beitrag erstellen</h2>
+            
+            <form th:action="@{/fragen/neu}" method="post">
+                
+                <div class="input-group">
+                    <label>Was möchtest du erstellen?</label>
+                    <select name="beitragTyp" id="beitragTyp" onchange="togglePreis(this.value)" required>
+                        <option value="FRAGE">❓ Frage stellen</option>
+                        <option value="SUCHE_NACHHILFE">🔍 Nachhilfe suchen</option>
+                        <option value="BIETE_NACHHILFE">🎓 Nachhilfe anbieten</option>
+                    </select>
+                </div>
+
+				<div id="preisBereich" style="display:none;">
+				    <label class="price-label">Preis pro Treffen: <span id="preisWert" style="color: #b71c1c; font-size: 1.2em;">10</span>€</label>
+				    <input type="range" name="preis" min="0" max="25" value="10" 
+				           oninput="document.getElementById('preisWert').innerText = this.value">
+				    <div style="display: flex; justify-content: space-between; color: #666; font-size: 0.8em; margin-top: 5px;">
+				        <span>0€ (Gratis)</span>
+				        <span>25€ (Max)</span>
+				    </div>
+				</div>
+
+                <div class="input-group">
+                    <select name="fach" id="fach" required>
+                        <option value="">Fach wählen…</option>
+                        <option>Mathe</option>
+                        <option>Deutsch</option>
+                        <option>Englisch</option>
+                        <option>Französisch</option>
+                        <option>Latein</option>
+                        <option>Spanisch</option>
+                        <option>Italienisch</option>
+                        <option>NWT</option>
+                        <option>IMP</option>
+                        <option>Informatik</option>
+                        <option>Musik</option>
+                        <option>Religion</option>
+                        <option>Ethik</option>
+                        <option>Physik</option>
+                        <option>Chemie</option>
+                        <option>Biologie</option>
+                        <option>Geschichte</option>
+                        <option>Geografie</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <select name="klasse" id="klasse" required>
+                        <option value="">Klasse wählen…</option>
+                        <option>5</option>
+                        <option>6</option>
+                        <option>7</option>
+                        <option>8</option>
+                        <option>9</option>
+                        <option>10</option>
+                        <option>11</option>
+                        <option>12</option>
+                        <option>13</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <textarea name="frageText" id="frageText" placeholder="Beschreibe dein Anliegen (z.B. welches Thema oder welche Zeiten du Zeit hast)..." required></textarea>
+                </div>
+                
+                <button type="submit" class="btn">Beitrag veröffentlichen</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function togglePreis(val) {
+            const preisDiv = document.getElementById('preisBereich');
+            // Nur anzeigen, wenn es NICHT eine einfache Frage ist
+            if (val === 'FRAGE') {
+                preisDiv.style.display = 'none';
+            } else {
+                preisDiv.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
