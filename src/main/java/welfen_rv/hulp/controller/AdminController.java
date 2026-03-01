@@ -10,11 +10,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import com.lowagie.text.Document;
 import com.lowagie.text.Font;
@@ -26,6 +22,7 @@ import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import welfen_rv.hulp.model.Frage;
 import welfen_rv.hulp.repository.ChatMessageRepository;
 import welfen_rv.hulp.repository.FrageRepository;
@@ -52,30 +49,38 @@ public class AdminController {
     }
 
     @PostMapping("/users/import")
-    public void handleImport(@RequestParam("namenListe") String namenListe, HttpServletResponse response) throws IOException {
-        
-        // 1. Robuster Split: Wir trimmen erst den gesamten Block und splitten dann.
-        // Das \\s*\\n\\s* sorgt dafür, dass Leerzeichen um den Umbruch herum ignoriert werden.
+    public String handleImport(@RequestParam("namenListe") String namenListe, Model model, HttpSession session) {
         String[] namenArray = namenListe.trim().split("\\r?\\n");
-        
         List<String> namen = Arrays.stream(namenArray)
-                .map(n -> n.replace("\uFEFF", "").trim()) // Versteckte Zeichen & Leerzeichen weg
-                .filter(n -> !n.isEmpty())               // Leere Zeilen raus
+                .map(n -> n.replace("\uFEFF", "").trim())
+                .filter(n -> !n.isEmpty())
                 .toList();
 
-        // Debug-Check (optional, kannst du in der Konsole prüfen)
-        System.out.println("Anzahl erkannter Namen: " + namen.size());
-
-        // 2. User anlegen & Passwörter generieren
         Map<String, String> credentials = userService.createUsersAndReturnPasswords(namen);
+        session.setAttribute("pdfCredentials", credentials);
 
-        // 3. PDF Setup
+        model.addAttribute("newUsers", credentials);
+        model.addAttribute("users", userRepository.findAll());
+        model.addAttribute("downloadPdf", true); 
+
+        return "admin/users";
+    }
+    
+    @GetMapping("/users/download-pdf")
+    public void downloadPdf(HttpSession session, HttpServletResponse response) throws IOException {
+        @SuppressWarnings("unchecked")
+        Map<String, String> credentials = (Map<String, String>) session.getAttribute("pdfCredentials");
+
+        if (credentials == null || credentials.isEmpty()) {
+            response.sendRedirect("/admin/users");
+            return;
+        }
+
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "attachment; filename=hulp_logins.pdf");
 
         Document document = new Document(PageSize.A4);
         PdfWriter.getInstance(document, response.getOutputStream());
-
         document.open();
         
         Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, Color.DARK_GRAY);
@@ -91,19 +96,16 @@ public class AdminController {
             cell.setMinimumHeight(100);
             cell.setBorderWidth(1);
             cell.setBorderColor(Color.LIGHT_GRAY);
-
             cell.addElement(new Paragraph("Hulp Login", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, Color.RED)));
             cell.addElement(new Paragraph("Nutzer: " + entry.getKey()));
             cell.addElement(new Paragraph("Passwort: " + entry.getValue()));
             cell.addElement(new Paragraph("\nBitte Passwort im Profil ändern!"));
-
             table.addCell(cell);
         }
-        
         table.completeRow();
-
         document.add(table);
         document.close();
+        session.removeAttribute("pdfCredentials");
     }
 
     @PostMapping("/users/delete/{id}")
@@ -114,21 +116,23 @@ public class AdminController {
     
     @GetMapping("/chats")
     public String chatModeration(Model model) {
-        // Alle Fragen laden (neueste zuerst)
-        List<Frage> alleFragen = frageRepository.findAll();
-        model.addAttribute("fragen", alleFragen);
+        model.addAttribute("fragen", frageRepository.findAll());
         return "admin/chats";
     }
 
     @PostMapping("/chats/delete/{id}")
     public String deleteChat(@PathVariable Long id) {
-        // 1. Zuerst alle ChatNachrichten löschen, die zu dieser Frage gehören
-        // (Falls du keine Cascade-Löschung in der DB hast)
         chatMessageRepository.deleteByFrageId(id); 
-        
-        // 2. Dann die Frage selbst löschen
         frageRepository.deleteById(id);
-        
         return "redirect:/admin/chats?deleted";
+    }
+    
+    @PostMapping("/users/update-role/{id}")
+    public String updateRole(@PathVariable Long id, @RequestParam String neueRolle) {
+        userRepository.findById(id).ifPresent(u -> {
+            u.setRole(neueRolle);
+            userRepository.save(u);
+        });
+        return "redirect:/admin/users?roleUpdated";
     }
 }

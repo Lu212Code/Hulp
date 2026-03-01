@@ -26,14 +26,49 @@
     </div>
 
 	<div class="card" style="margin-top: 20px; background: #1c1c1c; padding: 20px; border: 1px solid #333;">
-		<h3>🔐 Passwort ändern</h3>
-		<form th:action="@{/profil/passwort-aendern}" method="post" style="display: flex; gap: 10px; margin-top: 10px;">
-			<input type="password" name="neuesPasswort" placeholder="Neues Passwort (min. 5 Zeichen)" required 
-				style="flex: 1; padding: 10px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 4px;">
-			<button type="submit" class="btn">Speichern</button>
-		</form>
-		<p th:if="${param.success}" style="color: #4CAF50; font-size: 0.9em; margin-top: 10px;">✔ Passwort wurde geändert.</p>
+	    <h3>🔐 Passwort ändern</h3>
+	    <form th:action="@{/profil/passwort-aendern}" method="post" id="pwForm" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px; max-width: 400px;">
+	        
+	        <input type="password" id="pw1" name="neuesPasswort" placeholder="Neues Passwort (min. 5 Zeichen)" required 
+	            style="padding: 10px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 4px;">
+	        
+	        <input type="password" id="pw2" placeholder="Passwort wiederholen" required 
+	            style="padding: 10px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 4px;">
+	        
+	        <button type="submit" class="btn" style="width: fit-content;">Speichern</button>
+	        
+	        <p id="pwError" style="color: #ef4444; font-size: 0.85em; display: none; margin: 0;">Die Passwörter stimmen nicht überein!</p>
+	    </form>
+	    
+	    <p th:if="${param.success}" style="color: #4CAF50; font-size: 0.9em; margin-top: 10px;">✔ Passwort wurde geändert.</p>
 	</div>
+	
+	<script>
+	    const form = document.getElementById('pwForm');
+	    const pw1 = document.getElementById('pw1');
+	    const pw2 = document.getElementById('pw2');
+	    const errorMsg = document.getElementById('pwError');
+	
+	    form.onsubmit = function(e) {
+	        if (pw1.value !== pw2.value) {
+	            e.preventDefault(); // Stoppt das Absenden
+	            errorMsg.style.display = 'block';
+	            pw2.style.borderColor = '#ef4444';
+	            return false;
+	        }
+	        if (pw1.value.length < 5) {
+	            alert("Passwort muss mindestens 5 Zeichen lang sein.");
+	            e.preventDefault();
+	            return false;
+	        }
+	    };
+	
+	    // Fehlermeldung ausblenden, wenn der Nutzer wieder tippt
+	    pw2.oninput = function() {
+	        errorMsg.style.display = 'none';
+	        pw2.style.borderColor = '#444';
+	    };
+	</script>
 
     <h3 style="margin-top: 20px;">Statistik</h3>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">

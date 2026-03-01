@@ -48,7 +48,29 @@
             margin-bottom: 20px;
             font-size: 0.85em;
         }
+        
+		/* --- MOBILE OPTIMIZATION (Login/Forms) --- */
+		@media (max-width: 480px) {
+		    body {
+		        padding: 20px; /* Verhindert, dass die Card den Rand berührt */
+		        height: auto;  /* Erlaubt Scrollen, falls die Tastatur aufpoppt */
+		        min-height: 100vh;
+		    }
+		    .login-card {
+		        padding: 25px 20px; /* Etwas kompakter auf kleinen Screens */
+		        width: 100%;
+		        box-sizing: border-box; /* Wichtig, damit Padding die Breite nicht sprengt */
+		    }
+		    .input-group input {
+		        font-size: 16px; /* Verhindert automatisches Zoomen bei iOS (Safari) */
+		        padding: 15px 10px; /* Größere Klickfläche für Finger */
+		    }
+		    .btn {
+		        padding: 15px !important; /* Bessere Bedienbarkeit */
+		    }
+		}
     </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
     <div class="login-card">

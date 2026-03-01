@@ -26,7 +26,34 @@
 		    display: flex;         /* Neu: Flexbox aktivieren */
 		    flex-direction: column; /* Neu: Elemente untereinander */
 		}
+		/* --- MOBILE REPAIR KIT --- */
+		@media (max-width: 768px) {
+		    body { 
+		        display: block !important; /* Hebt das Flex-Layout auf */
+		    }
+		    .admin-sidebar { 
+		        position: relative !important; /* Sidebar klebt nicht mehr links */
+		        width: 100% !important; 
+		        height: auto !important; 
+		    }
+		    .admin-sidebar div {
+		        display: flex; /* Menüpunkte nebeneinander */
+		        flex-wrap: wrap;
+		    }
+		    .content { 
+		        margin-left: 0 !important; /* Content rutscht unter die Sidebar */
+		        width: 100% !important;
+		        padding: 10px !important;
+		    }
+		    .card {
+		        overflow-x: auto; /* Tabellen werden wischbar, kein Layout-Bruch */
+		    }
+		    table {
+		        min-width: 500px; /* Verhindert, dass die Tabelle zu schmal gequetscht wird */
+		    }
+		}
     </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 	<div class="admin-sidebar">
