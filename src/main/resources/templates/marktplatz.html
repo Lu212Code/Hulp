@@ -5,6 +5,7 @@
     <title>Hulp – Marktplatz</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         .filter-bar { background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: flex; gap: 15px; align-items: flex-end; }
         .filter-group { display: flex; flex-direction: column; gap: 5px; }
@@ -24,6 +25,9 @@
     <div class="section">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <h2><i class="fa-solid fa-shop"></i> Marktplatz</h2>
+            <div th:if="${param.deleted}" style="background: rgba(46, 125, 50, 0.2); border: 1px solid #2e7d32; color: #81c784; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+			    ✅ Die Anzeige wurde erfolgreich entfernt.
+			</div>
             <a href="/marktplatz/neu" class="btn">Verkaufen</a>
         </div>
 
@@ -52,14 +56,24 @@
                 <p th:text="${a.text}" style="color: var(--text-dim); font-size: 0.9em; min-height: 40px;"></p>
                 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px solid #333; padding-top: 10px;">
-                    <span style="font-weight: bold; font-size: 1.2em;" th:text="${a.preis + ' €'}"></span>
-                    
-                    <a th:if="${a.ersteller != #authentication.name}" 
-                       th:href="@{/chat/start/{id}(id=${a.id})}" class="btn" style="padding: 8px 15px;">Anfragen</a>
-                    
-                    <span th:if="${a.ersteller == #authentication.name}" style="font-size: 0.8em; color: var(--text-dim);">Eigene Anzeige</span>
-                </div>
-            </div>
+    <span style="font-weight: bold; font-size: 1.2em;" th:text="${a.preis + ' €'}"></span>
+    
+    <a th:if="${a.ersteller != #authentication.name}" 
+       th:href="@{/chat/start/{id}(id=${a.id})}" class="btn" style="padding: 8px 15px;">
+       <i class="fa-solid fa-comments"></i> Anfragen
+    </a>
+    
+    <div th:if="${a.ersteller == #authentication.name}" style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 0.8em; color: var(--text-dim); font-style: italic;">Deine Anzeige</span>
+        
+        <form th:action="@{/marktplatz/delete/{id}(id=${a.id})}" method="post" 
+              onsubmit="return confirm('Möchtest du dieses Inserat wirklich löschen?')">
+            <button type="submit" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 1.2em;" title="Löschen">
+                <i class="fa-solid fa-trash-can"></i>
+            </button>
+        </form>
+    </div>
+</div>
         </div>
     </div>
 </div>

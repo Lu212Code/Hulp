@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +32,8 @@ import welfen_rv.hulp.repository.UserRepository;
 @Controller
 public class ChatController {
 
+	private static final Logger logger = LoggerFactory.getLogger(ChatController.class);
+	
     @Autowired
     private FrageRepository frageRepository;
     @Autowired
@@ -39,10 +43,12 @@ public class ChatController {
 
     @GetMapping("/chat/{id}")
     public String showChat(@PathVariable Long id, Model model, @AuthenticationPrincipal UserDetails user) {
+    	logger.debug("User {} is trying to access chat for Frage ID {}", user.getUsername(), id);
         Frage frage = frageRepository.findById(id).orElseThrow();
         
         // Sicherheit: Nur Frager und Helfer dürfen in den Chat
         if (!user.getUsername().equals(frage.getErsteller()) && !user.getUsername().equals(frage.getHelfer())) {
+            logger.warn("Unauthorized access attempt: User {} tried to access chat for Frage ID {}", user.getUsername(), id);
             return "redirect:/fragen";
         }
 
@@ -55,6 +61,7 @@ public class ChatController {
     @MessageMapping("/chat.send/{id}")
     @SendTo("/topic/messages/{id}")
     public ChatMessage sendMessage(@DestinationVariable Long id, ChatMessage chatMsg, Principal principal) {
+    	logger.debug("Received message for Frage ID {}.", id);
         chatMsg.setFrageId(id);
         chatMsg.setSender(principal.getName());
         chatMsg.setZeitstempel(LocalDateTime.now());
@@ -65,6 +72,7 @@ public class ChatController {
     
     @GetMapping("/chat/start/{id}")
     public String helpFrage(@PathVariable Long id, @AuthenticationPrincipal UserDetails user) {
+    	logger.debug("User {} is trying to help with Frage ID {}", user.getUsername(), id);
         Frage beitrag = frageRepository.findById(id).orElseThrow();
         String aktuellerUser = user.getUsername();
 
@@ -87,6 +95,7 @@ public class ChatController {
 
     @PostMapping("/chat/beenden/{id}")
     public String beenden(@PathVariable Long id, @AuthenticationPrincipal UserDetails user) {
+    	logger.debug("User {} is trying to end chat for Frage ID {}", user.getUsername(), id);
         Frage frage = frageRepository.findById(id).orElseThrow();
         
         // Nur der Frager darf beenden!
@@ -102,6 +111,7 @@ public class ChatController {
     }
 
     private void updatePunkte(String username, int punkte) {
+    	logger.info("Updating points for user {}: adding {} points", username, punkte);
         User u = userRepository.findByUsername(username);
         if(u != null) {
             u.setPunkte(u.getPunkte() + punkte);
@@ -113,6 +123,7 @@ public class ChatController {
     public ResponseEntity<Void> archivieren(@PathVariable Long id, 
                                             @RequestBody List<String> sensitiveData, 
                                             @AuthenticationPrincipal UserDetails user) {
+    	logger.debug("User {} is trying to archive chat for Frage ID {}", user.getUsername(), id);
         Frage frage = frageRepository.findById(id).orElseThrow();
         
         if (frage.getErsteller().equals(user.getUsername())) {
@@ -143,7 +154,8 @@ public class ChatController {
     }
 
     private String anonymize(String text, List<String> sensitiveData) {
-        if (text == null) return "";
+    	if (text == null) return "";
+        logger.debug("Anonymizing text for a message (length: {})", text.length());
         String cleanText = text;
         for (String data : sensitiveData) {
             if (data != null && !data.isEmpty()) {
@@ -156,6 +168,7 @@ public class ChatController {
     
     @PostMapping("/chat/beenden-ohne-archiv/{id}")
     public ResponseEntity<Void> beendenOhneArchiv(@PathVariable Long id, @AuthenticationPrincipal UserDetails user) {
+    	logger.debug("User {} is trying to end chat without archiving for Frage ID {}", user.getUsername(), id);
         Frage frage = frageRepository.findById(id).orElseThrow();
         
         if (frage.getErsteller().equals(user.getUsername())) {

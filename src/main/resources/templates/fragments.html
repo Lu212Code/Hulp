@@ -9,9 +9,11 @@
 <div th:fragment="sidebar" class="sidebar">
     <th:block th:if="${#authentication.name != 'anonymousUser'}">
         <a href="/" class="sidebar-link"><i class="fa-solid fa-house"></i> <span>Startseite</span></a>
-        <a href="/fragen" class="sidebar-link"><i class="fa-solid fa-book"></i> <span>Fragen</span></a>
-        <a href="/nachhilfe" class="sidebar-link"><i class="fa-solid fa-graduation-cap"></i> <span>Nachhilfe</span></a>
-        <a href="/fragen/neu" class="sidebar-link"><i class="fa-solid fa-circle-plus"></i> <span>Neu</span></a>
+        
+        <a href="/fragen?type=FRAGE" class="sidebar-link"><i class="fa-solid fa-graduation-cap"></i> <span>Nachhilfe</span></a>
+        
+        <a href="/marktplatz" class="sidebar-link"><i class="fa-solid fa-shop"></i> <span>Marktplatz</span></a>
+        
         <a href="/meine-chats" class="sidebar-link"><i class="fa-solid fa-comment-dots"></i> <span>Chats</span></a>
         <a href="/leaderboard" class="sidebar-link"><i class="fa-solid fa-trophy"></i> <span>Ranking</span></a>
         <a href="/profil" class="sidebar-link"><i class="fa-solid fa-user"></i> <span>Profil</span></a>

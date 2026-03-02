@@ -10,8 +10,12 @@ import welfen_rv.hulp.model.ChatMessage;
 
 @Repository
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
-	@Transactional
-	void deleteByFrageId(Long frageId);
-    // Holt alle Nachrichten für einen bestimmten Chat, sortiert nach Zeit
+    
+    @Transactional
+    void deleteByFrageId(Long frageId);
+
+    // Nutzt du vielleicht später für die Archiv-Ansicht
     List<ChatMessage> findByFrageIdOrderByZeitstempelAsc(Long frageId);
+
+    List<ChatMessage> findTop10ByFrageIdOrderByZeitstempelDesc(Long frageId);
 }

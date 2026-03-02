@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,7 +25,6 @@ import com.lowagie.text.pdf.PdfWriter;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import welfen_rv.hulp.model.Frage;
 import welfen_rv.hulp.repository.ChatMessageRepository;
 import welfen_rv.hulp.repository.FrageRepository;
 import welfen_rv.hulp.repository.UserRepository;
@@ -33,6 +34,8 @@ import welfen_rv.hulp.service.UserService;
 @RequestMapping("/admin")
 public class AdminController {
 
+	private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
+	
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -44,12 +47,14 @@ public class AdminController {
 
     @GetMapping("/users")
     public String userManagement(Model model) {
+    	logger.info("Accessing user management page");
         model.addAttribute("users", userRepository.findAll());
         return "admin/users";
     }
 
     @PostMapping("/users/import")
     public String handleImport(@RequestParam("namenListe") String namenListe, Model model, HttpSession session) {
+    	logger.info("Importing users from input: {}", namenListe);
         String[] namenArray = namenListe.trim().split("\\r?\\n");
         List<String> namen = Arrays.stream(namenArray)
                 .map(n -> n.replace("\uFEFF", "").trim())
@@ -63,11 +68,13 @@ public class AdminController {
         model.addAttribute("users", userRepository.findAll());
         model.addAttribute("downloadPdf", true); 
 
+        logger.info("Created users: {}", credentials.keySet());
         return "admin/users";
     }
     
     @GetMapping("/users/download-pdf")
     public void downloadPdf(HttpSession session, HttpServletResponse response) throws IOException {
+    	logger.info("Preparing PDF download for user credentials");
         @SuppressWarnings("unchecked")
         Map<String, String> credentials = (Map<String, String>) session.getAttribute("pdfCredentials");
 
@@ -106,22 +113,26 @@ public class AdminController {
         document.add(table);
         document.close();
         session.removeAttribute("pdfCredentials");
+        logger.info("PDF generated and sent to client, session attribute cleared");
     }
 
     @PostMapping("/users/delete/{id}")
     public String deleteUser(@PathVariable Long id) {
+    	logger.info("Deleting user with ID: {}", id);
         userRepository.deleteById(id);
         return "redirect:/admin/users";
     }
     
     @GetMapping("/chats")
     public String chatModeration(Model model) {
+    	logger.info("Accessing chat moderation page");
         model.addAttribute("fragen", frageRepository.findAll());
         return "admin/chats";
     }
 
     @PostMapping("/chats/delete/{id}")
     public String deleteChat(@PathVariable Long id) {
+    	logger.info("Deleting chat with ID: {}", id);
         chatMessageRepository.deleteByFrageId(id); 
         frageRepository.deleteById(id);
         return "redirect:/admin/chats?deleted";
@@ -129,6 +140,7 @@ public class AdminController {
     
     @PostMapping("/users/update-role/{id}")
     public String updateRole(@PathVariable Long id, @RequestParam String neueRolle) {
+    	logger.info("Updating role for user ID: {} to new role: {}", id, neueRolle);
         userRepository.findById(id).ifPresent(u -> {
             u.setRole(neueRolle);
             userRepository.save(u);

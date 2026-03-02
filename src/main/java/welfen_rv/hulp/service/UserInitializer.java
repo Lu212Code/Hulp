@@ -7,17 +7,22 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
+import welfen_rv.hulp.controller.PageController;
 import welfen_rv.hulp.model.User;
 import welfen_rv.hulp.repository.UserRepository;
 
 @Service
 public class UserInitializer {
 
+	private static final Logger logger = LoggerFactory.getLogger(UserInitializer.class);
+	
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -31,6 +36,7 @@ public class UserInitializer {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(resource, StandardCharsets.UTF_8));
             String line;
+            logger.info("Starting user initialization from users.txt");
             while ((line = reader.readLine()) != null) {
                 String username = line.trim();
              // Innerhalb der while-Schleife im UserInitializer
@@ -48,14 +54,15 @@ public class UserInitializer {
                         newUser.setRole("Standard");
                     }
                     
+                    logger.info("Creating user: {} with role: {}", username, newUser.getRole());
                     userRepository.save(newUser);
-                    System.out.println("User angelegt: " + username + " | PW: " + rawPw + " | Rolle: " + newUser.getRole());
                     FileWriter writer = new FileWriter("created_users.txt", true);
                     BufferedWriter bw = new BufferedWriter(writer);
                     bw.write("User angelegt: " + username + " | PW: " + rawPw + " | Rolle: " + newUser.getRole() + "\n");
                     bw.write("Please delete this file after use to avoid security risks.\n");
                     bw.flush();
 					bw.close();
+					logger.info("User {} created with password: {}. Details written to created_users.txt. Please delete the created_users.txt file after use.", username, rawPw);
                 }
             }
         } catch (Exception e) {
@@ -64,6 +71,7 @@ public class UserInitializer {
     }
 
     private String generatePass(int len) {
+    	logger.debug("Generating random password of length {}", len);
         String chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
         Random rnd = new Random();
         StringBuilder sb = new StringBuilder();

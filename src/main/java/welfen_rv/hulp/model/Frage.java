@@ -16,7 +16,7 @@ public class Frage {
     private String helfer;
     
     private String beitragTyp;
-    private Integer preis;
+    private Double preis;
     
     @Column(columnDefinition = "TEXT") // Damit auch lange Texte reinpassen
     private String text;
@@ -50,8 +50,8 @@ public class Frage {
     public void setHelfer(String helfer) { this.helfer = helfer; }
 	public String getBeitragTyp() { return beitragTyp; }
 	public void setBeitragTyp(String beitragTyp) { this.beitragTyp = beitragTyp; }
-	public Integer getPreis() { return preis; }
-	public void setPreis(Integer preis) { this.preis = preis; }
+	public Double getPreis() { return preis; }
+	public void setPreis(Double preis) { this.preis = preis; }
 	public String getBild() { return bild; }
 	public void setBild(String bild) { this.bild = bild; }
 }
