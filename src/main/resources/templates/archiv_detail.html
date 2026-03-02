@@ -2,8 +2,10 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Archiv – Chat Verlauf</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
     <div th:replace="~{fragments :: sidebar}"></div>
@@ -16,7 +18,8 @@
                 <p style="color: #666; font-size: 0.8em;">Status: Gelöst & Anonymisiert</p>
             </div>
 
-            <div id="chatList" style="overflow-y: auto; max-height: 600px; display: flex; flex-direction: column; margin-top: 20px;">
+            <!-- Use a CSS-managed chat container instead of inline styles so responsive rules can apply -->
+            <div id="chatList" class="chat-container">
                 <div th:each="msg : ${messages}" 
                      th:classappend="${msg.sender == frage.ersteller} ? 'chat-left' : 'chat-right'" 
                      class="chat-bubble">

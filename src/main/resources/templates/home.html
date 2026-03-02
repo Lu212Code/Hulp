@@ -2,7 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Hulp – Startseite</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
     <div th:replace="~{fragments :: sidebar}"></div>
@@ -12,24 +14,30 @@
 
         <div class="section">
             <h1>Hulp</h1>
-            <p>Hulp ist ein einfaches Nachhilfe-Board...</p>
+            <p>Hulp ist dein Nachhilfe-Board.</p>
             
-            <h2>📦 Archivierte Fragen</h2>
+            <h2><i class="fa-solid fa-box-archive" style="color: var(--primary); margin-right: 10px;"></i>Archivierte Fragen</h2>
+            
             <div class="filter-bar">
                 <form action="/" method="get">
-                    <input name="search" placeholder="Archiv durchsuchen…">
+                    <i class="fa-solid fa-magnifying-glass" style="position: absolute; margin: 15px; color: #888;"></i>
+                    <input name="search" placeholder="Archiv durchsuchen…" style="padding-left: 40px;">
                 </form>
             </div>
-			<div id="fragenListe">
-			<div th:each="frage : ${archivedMessages}" class="archive-item" style="background: #252525; margin-bottom: 10px; padding: 15px; border-radius: 8px;">
-			    <h3 th:text="${frage.fach} + ' - ' + ${frage.klasse}"></h3>
-			    <p th:text="${#strings.abbreviate(frage.text, 100)}"></p>
-			    
-			    <a th:href="@{/archiv/chat/{id}(id=${frage.id})}" class="btn" style="background: #b71c1c; display: inline-block; text-decoration: none; padding: 5px 15px;">
-			        Lösung ansehen
-			    </a>
-			</div>
-			</div>
+
+            <div id="fragenListe">
+                <div th:each="frage : ${archivedMessages}" class="archive-item">
+                    <div class="archive-header">
+                        <h3 th:text="${frage.fach}">Mathe</h3>
+                        <span class="class-badge" th:text="${frage.klasse} + '. Klasse'">10. Klasse</span>
+                    </div>
+                    <p th:text="${#strings.abbreviate(frage.text, 100)}"></p>
+                    
+                    <a th:href="@{/archiv/chat/{id}(id=${frage.id})}" class="btn">
+                        <i class="fa-solid fa-eye"></i> Lösung ansehen
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </body>

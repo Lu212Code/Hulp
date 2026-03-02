@@ -169,9 +169,24 @@ tr:hover { background: rgba(255,255,255,0.05); }
 .chat-left { align-self: flex-start; background: #2a2a2a; border-bottom-left-radius: 2px; }
 .chat-right { align-self: flex-end; background: var(--primary); border-bottom-right-radius: 2px; }
 
+/* Username label inside bubble */
+.chat-username {
+  font-size: 0.75em;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+/* container helper so templates can apply their own size */
+.chat-container { width: 100%; }
+
 /* --- 8. Mobile Optimierung --- */
+@media (max-width: 1024px) {
+  .section { max-width: 100%; }
+  #chatList { height: 60vh; }
+}
+
 @media (max-width: 768px) {
-  body { flex-direction: column; }
+  body { flex-direction: column; height: auto; }
   .sidebar {
     width: 100%;
     height: auto;
@@ -181,6 +196,29 @@ tr:hover { background: rgba(255,255,255,0.05); }
   }
   .sidebar-link span { display: none; } /* Nur Emojis mobil */
   .main { padding: 20px; }
+
+  /* Make chat take the full width and adjust bubble sizes */
+  #chatList {
+    padding: 14px;
+    border-radius: 10px;
+    height: calc(100vh - 240px); /* allow topbar and other content */
+    max-height: 60vh;
+  }
+
+  .chat-bubble {
+    max-width: 92%;
+    padding: 10px;
+    font-size: 0.95em;
+  }
+
+  .chat-left { border-bottom-left-radius: 6px; }
+  .chat-right { border-bottom-right-radius: 6px; }
+
+  /* Make username concise and slightly bolder */
+  .chat-username { font-size: 0.72em; font-weight: 600; color: var(--text-dim); }
+
+  /* Buttons and links full width on small screens */
+  .btn { width: 100%; padding: 14px; border-radius: 10px; }
 }
 
 .userCorner {
@@ -192,4 +230,173 @@ tr:hover { background: rgba(255,255,255,0.05); }
   border-radius: 30px;
   cursor: pointer;
   box-shadow: var(--shadow);
+}
+
+@media (max-width: 768px) {
+    /* 1. Grundlayout */
+    .main {
+        margin-left: 0 !important;
+        padding: 10px !important;
+    }
+
+    /* 2. Die Suchleiste (Filter-Bar) */
+    .filter-bar {
+        margin-bottom: 20px;
+    }
+    
+    .filter-bar input {
+        width: 100%;
+        padding: 15px; /* Größer für Touch */
+        background: #2a2a2a;
+        border: 1px solid #444;
+        border-radius: 12px;
+        color: white;
+        font-size: 16px; /* Kein Auto-Zoom auf iPhone */
+    }
+
+    /* 3. Die Archiv-Karten (Das Herzstück) */
+    .archive-item {
+        background: #1e1e1e !important; /* Etwas dunklerer Kontrast */
+        border-left: 4px solid #b71c1c; /* Akzentfarbe als Markierung */
+        padding: 18px !important;
+        margin-bottom: 15px !important;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .archive-item h3 {
+        margin: 0;
+        font-size: 1.1em;
+        color: #fff;
+    }
+
+    .archive-item p {
+        color: #bbb;
+        font-size: 0.95em;
+        line-height: 1.4;
+        margin: 5px 0;
+    }
+
+    /* 4. Der Button als "Full-Width Action" */
+    .archive-item .btn {
+        display: block !important;
+        width: 100%;
+        text-align: center;
+        background: #b71c1c !important;
+        padding: 12px 0 !important;
+        border-radius: 8px !important;
+        font-weight: bold;
+        margin-top: 5px;
+    }
+
+    /* 5. Header-Anpassung */
+    h1 {
+        font-size: 1.8em;
+        text-align: center;
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+  body { 
+    flex-direction: column; 
+    height: 100vh; 
+    overflow: hidden; 
+  }
+
+  .main {
+    padding: 15px 15px 80px 15px !important; 
+    margin-left: 0 !important;
+    overflow-y: auto;
+  }
+
+  .sidebar {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 65px !important; 
+    flex-direction: row !important; 
+    justify-content: space-around !important; 
+    align-items: center !important;
+    padding: 0 5px !important; /* Weniger Padding für mehr Platz */
+    background: var(--bg-panel) !important;
+    border-top: 2px solid var(--primary);
+    z-index: 9999;
+  }
+
+  /* --- HIER: Rechtliche Links ausblenden --- */
+  /* Wir blenden alles aus, was "Datenschutz", "AGB" oder "Nutzung" im Link hat */
+  .sidebar a[href*="datenschutz"], 
+  .sidebar a[href*="agb"], 
+  .sidebar a[href*="nutzung"],
+  .sidebar a[href*="bedingungen"] {
+    display: none !important;
+  }
+
+  .sidebar-link, .sidebar button {
+    background: transparent !important;
+    font-size: 22px !important; 
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 0 !important;
+  }
+
+  .sidebar-link span {
+    font-size: 10px !important;
+    text-transform: none;
+    margin-top: 2px;
+  }
+}
+
+/* Standard für Desktop */
+.sidebar-link i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+    color: white;
+}
+
+/* Anpassung für deine mobile Bottom-Nav */
+@media (max-width: 768px) {
+    .sidebar-link i {
+        margin-right: 0;
+        margin-bottom: 4px;
+        font-size: 20px; /* Schön groß für den Daumen */
+        color: var(--primary); /* Icons in deinem Rot-Ton */
+    }
+    
+    .sidebar-link.active i {
+        color: white; /* Aktives Icon weiß leuchtend */
+    }
+}
+
+.icon-select {
+    /* WICHTIG: Die Schriftart muss exakt so heißen wie in Font Awesome */
+    font-family: "Font Awesome 6 Free", "Segoe UI", sans-serif !important;
+    font-weight: 900; /* Erforderlich für die Solid-Icons */
+}
+
+/* Manche Browser brauchen das auch für die Options */
+.icon-select option {
+    font-family: "Font Awesome 6 Free", "Segoe UI", sans-serif !important;
+}
+
+/* Marktplatz spezifisch */
+.card img {
+    border-bottom: 1px solid #333;
+}
+
+@media (max-width: 768px) {
+    .filter-bar {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .filter-bar div, .filter-bar input {
+        width: 100% !important;
+    }
 }

@@ -24,6 +24,10 @@ public class Frage {
     private String ersteller;
     private LocalDateTime erstelltAm;
     private boolean geloest = false;
+    
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String bild;
 
     // Konstruktoren
     public Frage() {
@@ -48,4 +52,6 @@ public class Frage {
 	public void setBeitragTyp(String beitragTyp) { this.beitragTyp = beitragTyp; }
 	public Integer getPreis() { return preis; }
 	public void setPreis(Integer preis) { this.preis = preis; }
+	public String getBild() { return bild; }
+	public void setBild(String bild) { this.bild = bild; }
 }

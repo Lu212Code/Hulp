@@ -68,21 +68,20 @@ public class ChatController {
         Frage beitrag = frageRepository.findById(id).orElseThrow();
         String aktuellerUser = user.getUsername();
 
-        // 1. Verhindern, dass man sich selbst hilft / bei sich selbst anfragt
         if (beitrag.getErsteller().equals(aktuellerUser)) {
-            // Wenn es Nachhilfe ist, zurück zur Nachhilfe-Seite, sonst zu Fragen
+            // Dynamische Rückleitung basierend auf dem Typ
+            if ("MARKTPLATZ".equals(beitrag.getBeitragTyp())) {
+                return "redirect:/marktplatz?error=self";
+            }
             return "FRAGE".equals(beitrag.getBeitragTyp()) ? 
                    "redirect:/fragen?error=self" : "redirect:/nachhilfe?error=self";
         }
 
-        // 2. Helfer setzen (Derjenige, der auf "Hilfe anbieten" oder "Kontakt" klickt)
         if (beitrag.getHelfer() == null) {
             beitrag.setHelfer(aktuellerUser);
             frageRepository.save(beitrag); 
         }
 
-        // 3. WICHTIG: Immer in den Chat leiten
-        // Der Chat-Endpunkt /chat/{id} kümmert sich um den Rest
         return "redirect:/chat/" + id;
     }
 

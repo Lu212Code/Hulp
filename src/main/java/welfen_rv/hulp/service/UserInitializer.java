@@ -1,16 +1,19 @@
 package welfen_rv.hulp.service;
 
-import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import welfen_rv.hulp.model.User;
-import welfen_rv.hulp.repository.UserRepository;
-
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import jakarta.annotation.PostConstruct;
+import welfen_rv.hulp.model.User;
+import welfen_rv.hulp.repository.UserRepository;
 
 @Service
 public class UserInitializer {
@@ -47,6 +50,12 @@ public class UserInitializer {
                     
                     userRepository.save(newUser);
                     System.out.println("User angelegt: " + username + " | PW: " + rawPw + " | Rolle: " + newUser.getRole());
+                    FileWriter writer = new FileWriter("created_users.txt", true);
+                    BufferedWriter bw = new BufferedWriter(writer);
+                    bw.write("User angelegt: " + username + " | PW: " + rawPw + " | Rolle: " + newUser.getRole() + "\n");
+                    bw.write("Please delete this file after use to avoid security risks.\n");
+                    bw.flush();
+					bw.close();
                 }
             }
         } catch (Exception e) {

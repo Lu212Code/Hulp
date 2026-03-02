@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Hulp – Marktplatz</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        .filter-bar { background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: flex; gap: 15px; align-items: flex-end; }
+        .filter-group { display: flex; flex-direction: column; gap: 5px; }
+        .market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .market-card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; transition: transform 0.2s; }
+        .market-card:hover { transform: translateY(-5px); }
+        .market-img { width: 100%; height: 180px; object-fit: cover; background: #f1f5f9; }
+        .market-content { padding: 15px; }
+        .price { font-size: 1.25rem; font-weight: bold; color: #059669; }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments :: sidebar}"></div>
+<div class="main">
+    <div th:replace="~{fragments :: topbar}"></div>
+
+    <div class="section">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2><i class="fa-solid fa-shop"></i> Marktplatz</h2>
+            <a href="/marktplatz/neu" class="btn">Verkaufen</a>
+        </div>
+
+        <div th:if="${param.error == 'self'}" style="background: rgba(183, 28, 28, 0.2); border: 1px solid var(--primary); color: white; padding: 15px; border-radius: 10px;">
+            ⚠️ Du kannst deine eigene Anzeige nicht kaufen/anfragen.
+        </div>
+
+        <form action="/marktplatz" method="get" class="filter-bar" style="background: var(--bg-panel); border: 1px solid #333;">
+            <div style="flex: 2;">
+                <input type="text" name="q" th:value="${param.q}" placeholder="Suchen...">
+            </div>
+            <div style="width: 120px;">
+                <input type="number" name="maxPreis" th:value="${param.maxPreis}" placeholder="Max €">
+            </div>
+            <button type="submit" class="btn"><i class="fa-solid fa-filter"></i></button>
+        </form>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+            <div th:each="a : ${anzeigen}" class="card">
+                <div th:if="${a.bild != null}" style="margin: -20px -20px 15px -20px;">
+                    <img th:src="'data:image/png;base64,' + ${a.bild}" 
+                         style="width: 100%; height: 180px; object-fit: cover; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                </div>
+                
+                <h3 th:text="${a.fach}" style="color: var(--accent-red); margin-bottom: 5px;"></h3>
+                <p th:text="${a.text}" style="color: var(--text-dim); font-size: 0.9em; min-height: 40px;"></p>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px solid #333; padding-top: 10px;">
+                    <span style="font-weight: bold; font-size: 1.2em;" th:text="${a.preis + ' €'}"></span>
+                    
+                    <a th:if="${a.ersteller != #authentication.name}" 
+                       th:href="@{/chat/start/{id}(id=${a.id})}" class="btn" style="padding: 8px 15px;">Anfragen</a>
+                    
+                    <span th:if="${a.ersteller == #authentication.name}" style="font-size: 0.8em; color: var(--text-dim);">Eigene Anzeige</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

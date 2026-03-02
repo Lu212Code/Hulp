@@ -7,7 +7,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class HulpApplication {
 
 	public static void main(String[] args) {
+		System.out.println("Starting HulpApplication...");
 		SpringApplication.run(HulpApplication.class, args);
+		System.out.println("HulpApplication started successfully.");
 	}
 
 }

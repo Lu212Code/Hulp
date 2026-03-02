@@ -2,18 +2,19 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
 
 <div th:fragment="sidebar" class="sidebar">
     <th:block th:if="${#authentication.name != 'anonymousUser'}">
-        <a href="/" class="sidebar-link">🏠 <span>Startseite</span></a>
-        <a href="/fragen" class="sidebar-link">📚 <span>Fragen</span></a>
-        <a href="/nachhilfe" class="sidebar-link">📚 <span>Nachhilfe</span></a>
-        <a href="/fragen/neu" class="sidebar-link">➕ <span>Neuer Beitrag</span></a>
-        <a href="/meine-chats" class="sidebar-link">💬 <span>Meine Chats</span></a>
-        <a href="/leaderboard" class="sidebar-link">🏆 <span>Leaderboard</span></a>
-        <a href="/profil" class="sidebar-link">🏆 <span>Profil</span></a>
+        <a href="/" class="sidebar-link"><i class="fa-solid fa-house"></i> <span>Startseite</span></a>
+        <a href="/fragen" class="sidebar-link"><i class="fa-solid fa-book"></i> <span>Fragen</span></a>
+        <a href="/nachhilfe" class="sidebar-link"><i class="fa-solid fa-graduation-cap"></i> <span>Nachhilfe</span></a>
+        <a href="/fragen/neu" class="sidebar-link"><i class="fa-solid fa-circle-plus"></i> <span>Neu</span></a>
+        <a href="/meine-chats" class="sidebar-link"><i class="fa-solid fa-comment-dots"></i> <span>Chats</span></a>
+        <a href="/leaderboard" class="sidebar-link"><i class="fa-solid fa-trophy"></i> <span>Ranking</span></a>
+        <a href="/profil" class="sidebar-link"><i class="fa-solid fa-user"></i> <span>Profil</span></a>
     </th:block>
 
     <div th:if="${#authentication.name == 'anonymousUser'}" style="padding: 10px; color: var(--text-dim); text-align: center;">

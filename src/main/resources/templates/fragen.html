@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Hulp – Fragen</title>
     <link rel="stylesheet" th:href="@{css/style.css}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
     <div th:replace="~{fragments :: sidebar}"></div>
@@ -71,7 +73,7 @@
                 <form th:action="@{/fragen/delete/{id}(id=${f.id})}" method="post" 
                       onsubmit="return confirm('Möchtest du deine Frage wirklich löschen?')">
                     <button type="submit" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.1em;" title="Frage löschen">
-                        🗑️
+                        <i class="fa-solid fa-trash-can"></i>
                     </button>
                 </form>
             </div>
@@ -79,7 +81,7 @@
     </div>
 
     <div th:if="${#lists.isEmpty(fragen)}" style="text-align: center; padding: 50px; color: #888; background: #1c1c1c; border-radius: 12px; border: 1px dashed #333;">
-        <p>🔍 Aktuell gibt es keine offenen Fragen in diesem Bereich.</p>
+        <i class="fa-solid fa-magnifying-glass"></i><p>Aktuell gibt es keine offenen Fragen in diesem Bereich.</p>
         <a href="/fragen/neu" style="color: #b71c1c; text-decoration: none; font-weight: bold;">Stelle du die erste Frage!</a>
     </div>
 </div>
